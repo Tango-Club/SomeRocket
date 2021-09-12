@@ -26,8 +26,8 @@ public class StorageEngine {
 
 	StorageEngine(String dataPath, String offsetPath, boolean exist) throws IOException {
 
-		dataFile = new RandomAccessFile(dataPath, "rws");
-		offsetFile = new RandomAccessFile(offsetPath, "rws");
+		dataFile = new RandomAccessFile(dataPath, "rw");
+		offsetFile = new RandomAccessFile(offsetPath, "rw");
 
 		if (exist) {
 			dataNumber = (long) (offsetFile.length() / 8) - 1;

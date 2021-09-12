@@ -1,3 +1,6 @@
+### 参考资料
+* JDK核心JAVA源码解析（5） - JAVA File MMAP原理解析 - 干货满满张哈希的文章 - 知乎 https://zhuanlan.zhihu.com/p/258934554
+
 ### 提交方式
 ```
 git remote add tianchi git@code.aliyun.com:952130278/mq-sample.git
