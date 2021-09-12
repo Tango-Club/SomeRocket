@@ -3,7 +3,7 @@
 git remote add tianchi https://code.aliyun.com/952130278/mq-sample.git
 git fetch tianchi
 git checkout tianchi/master
-git rebase origin/master
+git rebase origin/main
 git push -f
 ```
 
