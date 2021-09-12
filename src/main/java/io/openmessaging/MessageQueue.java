@@ -1,5 +1,6 @@
 package io.openmessaging;
 
+import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ public abstract class MessageQueue {
      * @param queueId topic下队列的id，每个topic下不超过10000个
      * @param data 信息的内容，评测时会随机产生
      */
-    public abstract long append(String topic, int queueId, ByteBuffer data);
+    public abstract long append(String topic, int queueId, ByteBuffer data) throws FileNotFoundException;
 
     /**
      * 读取某个范围内的信息；
