@@ -3,7 +3,6 @@
 *.jar
 *.iml
 target/
-src/main/java/io/openmessaging/StorageEngine.java
 .logs/debug.log
 .logs/error.log
 persistent_heap

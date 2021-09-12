@@ -8,7 +8,7 @@ import org.junit.Test;
 
 public class CorrectTest {
 	MessageQueue messageQueue = new DefaultMessageQueueImpl();
-	//MessageQueue messageQueue=new SampleMessageQueueImpl();
+	// MessageQueue messageQueue=new SampleMessageQueueImpl();
 
 	public static ByteBuffer getByteBuffer(String str) {
 		return ByteBuffer.wrap(str.getBytes());
