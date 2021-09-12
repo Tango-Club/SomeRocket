@@ -10,33 +10,43 @@ public class CorrectTest {
 	MessageQueue messageQueue = new DefaultMessageQueueImpl();
 	// MessageQueue messageQueue=new SampleMessageQueueImpl();
 
-	public static ByteBuffer getByteBuffer(String str) {
-		return ByteBuffer.wrap(str.getBytes());
-	}
-
-	public static String getString(ByteBuffer buffer) throws Exception {
-		return new String(buffer.array(), 0, buffer.capacity(), "utf-8");
-	}
-
 	@Test
 	public void main0() {
-		String text = "Hello Message Queue!";
-		String topic = "TestTopic";
-		int queueId = 123;
-
+		Common.cleanStorage();
 		try {
-			messageQueue.append(topic, queueId, getByteBuffer(text));
+			long res = -1;
 
-			Map<Integer, ByteBuffer> resultMap = messageQueue.getRange(topic, queueId, 0, 1);
+			res = messageQueue.append("a", 1001, Common.getByteBuffer("2021"));
+			Assert.assertEquals(0, res);
 
-			Assert.assertNotEquals(resultMap.size(), 0);
+			res = messageQueue.append("b", 1001, Common.getByteBuffer("2021"));
+			Assert.assertEquals(0, res);
 
-			String msgRead = getString(resultMap.get(0));
+			res = messageQueue.append("a", 1000, Common.getByteBuffer("2021"));
+			Assert.assertEquals(0, res);
 
-			Assert.assertEquals(msgRead, text);
+			res = messageQueue.append("b", 1001, Common.getByteBuffer("2021"));
+			Assert.assertEquals(1, res);
+
+			Map<Integer, ByteBuffer> mp;
+
+			mp = messageQueue.getRange("a", 1000, 1, 2);
+			Assert.assertEquals(0, mp.size());
+
+			mp = messageQueue.getRange("b", 1001, 0, 2);
+			Assert.assertEquals(2, mp.size());
+			Assert.assertEquals("2021", Common.getString(mp.get(0)));
+			Assert.assertEquals("2021", Common.getString(mp.get(1)));
+
+			mp = messageQueue.getRange("b", 1001, 1, 2);
+			Assert.assertEquals(1, mp.size());
+			Assert.assertEquals("2021", Common.getString(mp.get(0)));
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
 		}
-	} // End of main function
+	}
+
+	// End of main function
 }

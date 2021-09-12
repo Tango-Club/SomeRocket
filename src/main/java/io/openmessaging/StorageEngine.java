@@ -41,19 +41,21 @@ public class StorageEngine {
 	}
 
 	public long write(ByteBuffer buffer) throws IOException {
+		// logger.debug("append buffer length:"+buffer.capacity());
 		dataFile.seek(dataFile.length());
+		lastOffset += buffer.capacity();
 		byte[] data = new byte[buffer.capacity()];
 
 		buffer.get(data);
 		dataFile.write(data);
 
-		lastOffset += buffer.capacity();
 		appendOffset(lastOffset);
 		dataNumber++;
-		return dataNumber-1;
+		return dataNumber - 1;
 	}
 
 	public ByteBuffer readNoSeek(long offset, int length) throws IOException {
+		// logger.debug("index:"+offset+",length:"+length);
 		ByteBuffer buffer = ByteBuffer.allocate(length);
 		byte[] data = new byte[length];
 		dataFile.read(data);
@@ -68,6 +70,7 @@ public class StorageEngine {
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(long index, int fetchNum) {
+		fetchNum = (int) Math.min((long) fetchNum, dataNumber - index);
 		HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
 		try {
 			dataFile.seek(getOffsetByIndex(index));
