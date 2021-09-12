@@ -55,7 +55,7 @@ public class StorageEngine {
 	}
 
 	public ByteBuffer readNoSeek(long offset, int length) throws IOException {
-		// logger.debug("index:"+offset+",length:"+length);
+		logger.debug("index:"+offset+",length:"+length);
 		ByteBuffer buffer = ByteBuffer.allocate(length);
 		byte[] data = new byte[length];
 		dataFile.read(data);
