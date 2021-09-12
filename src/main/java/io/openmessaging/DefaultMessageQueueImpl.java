@@ -1,35 +1,32 @@
 package io.openmessaging;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import io.openmessaging.MessageBuffer;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
 	ConcurrentHashMap<String, HashMap<Integer, MessageBuffer>> topicQueueMap = new ConcurrentHashMap<>();
 	ConcurrentHashMap<String, Map<Integer, Map<Long, ByteBuffer>>> appendData = new ConcurrentHashMap<>();
 
-	// getOrPutDefault 若指定key不存在，则插入defaultValue并返回
-	private <K, V> V getOrPutDefault(Map<K, V> map, K key, V defaultValue) {
-		V retObj = map.get(key);
-		if (retObj != null) {
-			return retObj;
-		}
-		map.put(key, defaultValue);
-		return defaultValue;
-	}
-
 	@Override
-	public long append(String topic, int queueId, ByteBuffer data) throws FileNotFoundException {
+	public long append(String topic, int queueId, ByteBuffer data) {
 		if (!topicQueueMap.containsKey(topic)) {
 			topicQueueMap.put(topic, new HashMap<Integer, MessageBuffer>());
 		}
 		if (!topicQueueMap.get(topic).containsKey(queueId)) {
-			topicQueueMap.get(topic).put(queueId, new MessageBuffer(topic, queueId));
+			try {
+				topicQueueMap.get(topic).put(queueId, new MessageBuffer(topic, queueId));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-		return topicQueueMap.get(topic).get(queueId).add(data);
-
+		try {
+			return topicQueueMap.get(topic).get(queueId).appendData(data);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return -1;
 	}
 
 	@Override
@@ -41,6 +38,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		if (!topicQueueMap.get(topic).containsKey(queueId)) {
 			return new HashMap<>();
 		}
-		return topicQueueMap.get(topic).get(queueId).get(offset, fetchNum);
+		return topicQueueMap.get(topic).get(queueId).getRange(offset, fetchNum);
+
 	}
 }

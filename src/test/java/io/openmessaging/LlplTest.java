@@ -59,7 +59,6 @@ public class LlplTest {
 
 	@Test
 	public void main0() {
-		String option = "0";
 		byte[] input;
 		int size; // String length
 

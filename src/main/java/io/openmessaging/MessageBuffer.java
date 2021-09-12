@@ -1,14 +1,8 @@
 package io.openmessaging;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.Map;
-import io.openmessaging.LlplCache;
-import io.openmessaging.DiskStorage;
 
 public class MessageBuffer {
 	DiskStorage storage;
@@ -21,38 +15,22 @@ public class MessageBuffer {
 		return false;
 	}
 
-	private void initPath(String path) {
-		File file = new File(path);
-		if (file.exists())
-			file.delete();
-		try {
-			file.createNewFile();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	MessageBuffer(String topic, int queueId) throws FileNotFoundException {
+	MessageBuffer(String topic, int queueId) throws IOException {
 		this.topic = topic;
 		this.queueId = queueId;
 
-		String storagePath = "./ds_" + this.topic + "_" + Integer.toString(this.queueId);
-		String cachePath = "./lc_" + this.topic + "_" + Integer.toString(this.queueId);
-		initPath(storagePath);
-		initPath(cachePath);
-
-		storage = new DiskStorage(new FileReader(storagePath));
-		cache = new LlplCache(new FileReader(cachePath));
+		storage = new DiskStorage(topic, queueId);
+		cache = new LlplCache(topic, queueId);
 	}
 
-	public long add(ByteBuffer data) {
-		int pos = storage.writeToDisk(data);
+	public long appendData(ByteBuffer data) throws IOException {
+		long pos = storage.writeToDisk(data);
 		if (checkHot())
 			cache.writeToDisk(data);
 		return pos;
 	}
 
-	public HashMap<Integer, ByteBuffer> get(long offset, int fetchNum) {
+	public HashMap<Integer, ByteBuffer> getRange(long offset, int fetchNum) {
 		if (cache.inLlpl(offset, fetchNum)) {
 			return cache.readFromDisk(offset, fetchNum);
 		} else {

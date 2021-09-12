@@ -2,34 +2,51 @@ package io.openmessaging;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.StringTokenizer;
-import io.openmessaging.FastScanner;
 
 public class DiskStorage {
-	FastScanner scanner;
-	FastWriter writer;
+	StorageEngine engine;
 
-	DiskStorage(FileReader fd) {
-		scanner = new FastScanner(fd);
-		writer = new FastWriter();
+	DiskStorage(String topic, int queueId) throws IOException {
+		String pathPre = "./storage/ds_" + topic + "_" + Integer.toString(queueId);
+
+		String dataPath = pathPre + ".data";
+		initPath(dataPath);
+
+		String offsetPath = pathPre + ".offset";
+		boolean exist = initPath(offsetPath);
+
+		engine = new StorageEngine(dataPath, offsetPath, exist);
 	}
 
-	int writeToDisk(ByteBuffer data) {
-
-		byte[] b = new byte[data.remaining()];
-		return writer.write(b);
-		// TODO: WRITE TO DISK
-
+	private void initDirectory() {
+		File file = new File("./storage");
+		if (!file.exists()) {
+			file.mkdir();
+		}
 	}
 
-	HashMap<Integer, ByteBuffer> readFromDisk(long offset, int num) {
-		// TODO: GET FROM DISK
-		byte[] bytes = new byte[500];
-		HashMap<Integer, ByteBuffer> ret = new HashMap<>();
-		ret.put(1, ByteBuffer.wrap(bytes));
-		return ret;
+	private boolean initPath(String path) {
+		initDirectory();
+		File file = new File(path);
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+				return false;
+			} else
+				return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
+	long writeToDisk(ByteBuffer data) throws IOException {
+		return engine.write(data);
+	}
+
+	HashMap<Integer, ByteBuffer> readFromDisk(long offset, int fetchNum) {
+		return engine.getRange(offset, fetchNum);
 	}
 
 }
