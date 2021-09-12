@@ -1,3 +1,12 @@
+### 提交方式
+```
+git remote add tianchi https://code.aliyun.com/952130278/mq-sample.git
+git checkout tianchi/master
+git rebase origin/master
+git push -f
+```
+
+
 >写在前面: 
 > 1.在开始coding前请仔细阅读以下内容
 

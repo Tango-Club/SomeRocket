@@ -8,25 +8,28 @@ import java.util.StringTokenizer;
 import io.openmessaging.FastScanner;
 
 public class DiskStorage {
-    FastScanner sc;
-    FastWriter wr;
-    DiskStorage(FileReader fd)  {
-        sc = new FastScanner(fd);
-        wr = new FastWriter();
-    }
-    int writeToDisk(ByteBuffer data){
+	FastScanner scanner;
+	FastWriter writer;
 
-        byte[] b = new byte[data.remaining()];
-        return wr.write(b);
-        //TODO: WRITE TO DISK
+	DiskStorage(FileReader fd) {
+		scanner = new FastScanner(fd);
+		writer = new FastWriter();
+	}
 
-    }
-    HashMap<Integer, ByteBuffer> readFromDisk(long offset, int num){
-        //TODO: GET FROM DISK
-        byte[] bytes = new byte [500];
-        HashMap<Integer, ByteBuffer> ret= new HashMap<>();
-        ret.put(1,ByteBuffer.wrap(bytes));
-        return ret;
-    }
+	int writeToDisk(ByteBuffer data) {
+
+		byte[] b = new byte[data.remaining()];
+		return writer.write(b);
+		// TODO: WRITE TO DISK
+
+	}
+
+	HashMap<Integer, ByteBuffer> readFromDisk(long offset, int num) {
+		// TODO: GET FROM DISK
+		byte[] bytes = new byte[500];
+		HashMap<Integer, ByteBuffer> ret = new HashMap<>();
+		ret.put(1, ByteBuffer.wrap(bytes));
+		return ret;
+	}
 
 }
