@@ -41,7 +41,6 @@ public class StorageEngine {
 	}
 
 	public synchronized long write(ByteBuffer buffer) throws IOException {
-		// logger.debug("append buffer length:"+buffer.capacity());
 		dataFile.seek(dataFile.length());
 		lastOffset += buffer.capacity();
 		byte[] data = new byte[buffer.capacity()];
@@ -55,7 +54,6 @@ public class StorageEngine {
 	}
 
 	public ByteBuffer readNoSeek(long offset, int length) throws IOException {
-		logger.debug("index:"+offset+",length:"+length);
 		ByteBuffer buffer = ByteBuffer.allocate(length);
 		byte[] data = new byte[length];
 		dataFile.read(data);
