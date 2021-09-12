@@ -42,7 +42,11 @@ public class StorageEngine {
 
 	public long write(ByteBuffer buffer) throws IOException {
 		dataFile.seek(dataFile.length());
-		dataFile.write(buffer.array());
+		byte[] data = new byte[buffer.capacity()];
+
+		buffer.get(data);
+		dataFile.write(data);
+
 		lastOffset += buffer.capacity();
 		appendOffset(lastOffset);
 		dataNumber++;
