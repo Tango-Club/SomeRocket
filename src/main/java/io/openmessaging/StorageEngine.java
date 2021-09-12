@@ -50,7 +50,7 @@ public class StorageEngine {
 		lastOffset += buffer.capacity();
 		appendOffset(lastOffset);
 		dataNumber++;
-		return dataNumber;
+		return dataNumber-1;
 	}
 
 	public ByteBuffer readNoSeek(long offset, int length) throws IOException {
