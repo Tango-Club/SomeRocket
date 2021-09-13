@@ -1,6 +1,7 @@
 package io.openmessaging;
 
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,7 +15,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
-		if(topic.equals("topic78")&&queueId==1795)logger.info("append:"+topic+","+queueId);
+		if(topic.equals("topic78")&&queueId==1795)logger.info("append:"+topic+","+queueId+","+data);
 		if (!topicQueueMap.containsKey(topic)) {
 			topicQueueMap.put(topic, new HashMap<Integer, MessageBuffer>());
 		}
@@ -43,7 +44,14 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 		Map<Integer, ByteBuffer>mp=topicQueueMap.get(topic).get(queueId).getRange(offset, fetchNum);
 		if(topic.equals("topic78")&&queueId==1795)logger.info("getRange:"+topic+","+queueId+","+offset+","+fetchNum);
-		if(topic.equals("topic78")&&queueId==1795)logger.info("mpsize:"+mp.size());
+		if(topic.equals("topic78")&&queueId==1795){
+			logger.info("mpsize:"+mp.size());
+			for(ByteBuffer buffer:mp.values())
+			{
+				logger.info(buffer);
+			}
+		}
+		
 		return mp;
 
 	}
