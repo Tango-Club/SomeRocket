@@ -53,7 +53,7 @@ public class StorageEngine {
 		return dataNumber - 1;
 	}
 
-	public ByteBuffer readNoSeek(long offset, int length) throws IOException {
+	public ByteBuffer readNoSeek(int length) throws IOException {
 		ByteBuffer buffer = ByteBuffer.allocate(length);
 		byte[] data = new byte[length];
 		dataFile.read(data);
@@ -64,7 +64,14 @@ public class StorageEngine {
 	public ByteBuffer getDataByIndexNoSeek(long index) throws IOException {
 		long offset = getOffsetByIndex(index);
 		int length = (int) (getOffsetByIndex(index + 1) - offset);
-		return readNoSeek(offset, length);
+		return readNoSeek(length);
+	}
+
+	public ByteBuffer getDataByIndex(long index) throws IOException {
+		long offset = getOffsetByIndex(index);
+		dataFile.seek(offset);
+		int length = (int) (getOffsetByIndex(index + 1) - offset);
+		return readNoSeek(length);
 	}
 
 	public synchronized HashMap<Integer, ByteBuffer> getRange(long index, int fetchNum) {
@@ -73,7 +80,7 @@ public class StorageEngine {
 		try {
 			dataFile.seek(getOffsetByIndex(index));
 			for (int i = 0; i < fetchNum; i++) {
-				result.put(i, getDataByIndexNoSeek(i + index));
+				result.put(i, getDataByIndex(i + index));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
