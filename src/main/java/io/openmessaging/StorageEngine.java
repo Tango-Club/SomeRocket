@@ -58,6 +58,7 @@ public class StorageEngine {
 		byte[] data = new byte[length];
 		dataFile.read(data);
 		buffer.put(data);
+		buffer.flip();
 		return buffer;
 	}
 
