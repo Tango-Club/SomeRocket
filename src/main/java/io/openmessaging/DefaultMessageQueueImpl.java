@@ -14,7 +14,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
-		logger.info("append:"+topic+","+queueId);
+		//logger.info("append:"+topic+","+queueId);
 		if (!topicQueueMap.containsKey(topic)) {
 			topicQueueMap.put(topic, new HashMap<Integer, MessageBuffer>());
 		}
