@@ -14,7 +14,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
-		if(topic=="topic78"&&queueId==1795)logger.info("append:"+topic+","+queueId);
+		if(topic.equals("topic78")&&queueId==1795)logger.info("append:"+topic+","+queueId);
 		if (!topicQueueMap.containsKey(topic)) {
 			topicQueueMap.put(topic, new HashMap<Integer, MessageBuffer>());
 		}
@@ -42,8 +42,8 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			return new HashMap<>();
 		}
 		Map<Integer, ByteBuffer>mp=topicQueueMap.get(topic).get(queueId).getRange(offset, fetchNum);
-		if(topic=="topic78"&&queueId==1795)logger.info("getRange:"+topic+","+queueId+","+offset+","+fetchNum);
-		if(topic=="topic78"&&queueId==1795)logger.info("mpsize:"+mp.size());
+		if(topic.equals("topic78")&&queueId==1795)logger.info("getRange:"+topic+","+queueId+","+offset+","+fetchNum);
+		if(topic.equals("topic78")&&queueId==1795)logger.info("mpsize:"+mp.size());
 		return mp;
 
 	}
