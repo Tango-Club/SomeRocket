@@ -19,13 +19,13 @@ public class CorrectTest {
 			res = messageQueue.append("a", 1001, Common.getByteBuffer("2021"));
 			Assert.assertEquals(0, res);
 
-			res = messageQueue.append("b", 1001, Common.getByteBuffer("2021"));
+			res = messageQueue.append("b", 1001, Common.getByteBuffer("2022"));
 			Assert.assertEquals(0, res);
 
-			res = messageQueue.append("a", 1000, Common.getByteBuffer("2021"));
+			res = messageQueue.append("a", 1000, Common.getByteBuffer("2023"));
 			Assert.assertEquals(0, res);
 
-			res = messageQueue.append("b", 1001, Common.getByteBuffer("2021"));
+			res = messageQueue.append("b", 1001, Common.getByteBuffer("2024"));
 			Assert.assertEquals(1, res);
 
 			Map<Integer, ByteBuffer> mp;
@@ -35,12 +35,12 @@ public class CorrectTest {
 
 			mp = messageQueue.getRange("b", 1001, 0, 2);
 			Assert.assertEquals(2, mp.size());
-			Assert.assertEquals("2021", Common.getString(mp.get(0)));
-			Assert.assertEquals("2021", Common.getString(mp.get(1)));
+			Assert.assertEquals("2022", Common.getString(mp.get(0)));
+			Assert.assertEquals("2024", Common.getString(mp.get(1)));
 
 			mp = messageQueue.getRange("b", 1001, 1, 2);
 			Assert.assertEquals(1, mp.size());
-			Assert.assertEquals("2021", Common.getString(mp.get(0)));
+			Assert.assertEquals("2024", Common.getString(mp.get(0)));
 
 		} catch (Exception e) {
 			e.printStackTrace();
