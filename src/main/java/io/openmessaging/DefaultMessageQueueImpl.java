@@ -7,7 +7,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
 
-
 public class DefaultMessageQueueImpl extends MessageQueue {
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 	ConcurrentHashMap<String, HashMap<Integer, MessageBuffer>> topicQueueMap = new ConcurrentHashMap<>();
@@ -15,7 +14,6 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
-		if(topic.equals("topic78")&&queueId==1795)logger.info("append:"+topic+","+queueId+","+data);
 		if (!topicQueueMap.containsKey(topic)) {
 			topicQueueMap.put(topic, new HashMap<Integer, MessageBuffer>());
 		}
@@ -42,17 +40,6 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		if (!topicQueueMap.get(topic).containsKey(queueId)) {
 			return new HashMap<>();
 		}
-		Map<Integer, ByteBuffer>mp=topicQueueMap.get(topic).get(queueId).getRange(offset, fetchNum);
-		if(topic.equals("topic78")&&queueId==1795)logger.info("getRange:"+topic+","+queueId+","+offset+","+fetchNum);
-		if(topic.equals("topic78")&&queueId==1795){
-			logger.info("mpsize:"+mp.size());
-			for(ByteBuffer buffer:mp.values())
-			{
-				logger.info(buffer);
-			}
-		}
-		
-		return mp;
-
+		return topicQueueMap.get(topic).get(queueId).getRange(offset, fetchNum);
 	}
 }
