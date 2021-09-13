@@ -80,7 +80,7 @@ public class StorageEngine {
 		try {
 			dataFile.seek(getOffsetByIndex(index));
 			for (int i = 0; i < fetchNum; i++) {
-				result.put(i, getDataByIndex(i + index));
+				result.put(i, getDataByIndexNoSeek(i + index));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

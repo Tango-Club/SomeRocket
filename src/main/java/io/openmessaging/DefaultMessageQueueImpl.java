@@ -35,14 +35,16 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public Map<Integer, ByteBuffer> getRange(String topic, int queueId, long offset, int fetchNum) {
-		logger.info("getRange:"+topic+","+queueId+","+fetchNum);
 		if (!topicQueueMap.containsKey(topic)) {
 			return new HashMap<>();
 		}
 		if (!topicQueueMap.get(topic).containsKey(queueId)) {
 			return new HashMap<>();
 		}
-		return topicQueueMap.get(topic).get(queueId).getRange(offset, fetchNum);
+		Map<Integer, ByteBuffer>mp=topicQueueMap.get(topic).get(queueId).getRange(offset, fetchNum);
+		logger.info("getRange:"+topic+","+queueId+","+offset+","+fetchNum);
+		logger.info("mpsize:"+mp.size());
+		return mp;
 
 	}
 }
