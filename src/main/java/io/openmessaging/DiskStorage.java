@@ -8,7 +8,7 @@ public class DiskStorage {
 	StorageEngine engine;
 
 	DiskStorage(String topic, int queueId) throws IOException {
-		String pathPre = "./storage/ds_" + topic + "_" + Integer.toString(queueId);
+		String pathPre = "/essd/ds_" + topic + "_" + Integer.toString(queueId);
 
 		String dataPath = pathPre + ".data";
 		initPath(dataPath);
@@ -20,7 +20,7 @@ public class DiskStorage {
 	}
 
 	private void initDirectory() {
-		File file = new File("./storage");
+		File file = new File("/essd");
 		if (!file.exists()) {
 			file.mkdir();
 		}

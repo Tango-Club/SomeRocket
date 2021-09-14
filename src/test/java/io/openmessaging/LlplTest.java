@@ -1,5 +1,7 @@
 package io.openmessaging;
 
+import java.io.File;
+
 import com.intel.pmem.llpl.Heap;
 import com.intel.pmem.llpl.MemoryBlock;
 import org.junit.Assert;
@@ -82,5 +84,8 @@ public class LlplTest {
 		String msgRead = read_hello_string(h, size);
 
 		Assert.assertEquals(msgRead, msg);
+		
+		File file = new File(path);
+		file.delete();
 	} // End of main function
 }

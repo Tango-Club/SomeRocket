@@ -5,7 +5,7 @@ import java.nio.ByteBuffer;
 
 public class Common {
 	public static void cleanStorage() {
-		File file = new File("./storage");
+		File file = new File("/essd");
 		String[] children = file.list();
 		for (int i = 0; i < children.length; i++) {
 			new File(file, children[i]).delete();
