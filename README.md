@@ -7,6 +7,17 @@
 * JDK核心JAVA源码解析（5） - JAVA File MMAP原理解析 - https://zhuanlan.zhihu.com/p/258934554
 * Linux中的Page Cache [一] - https://zhuanlan.zhihu.com/p/68071761
 * Kafka存储模型 - https://blog.csdn.net/FlyingAngelet/article/details/84761466
+
+### 当前存储结构
+
+##### 内存(8G)
+* StorageEngine等对象
+##### PMEM(126G)
+##### SSD(400G)
+* 冷数据
+  - binary data
+  - binary offset
+
 ### 提交方式
 ```
 git remote add tianchi git@code.aliyun.com:952130278/mq-sample.git
