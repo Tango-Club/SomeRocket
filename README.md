@@ -3,6 +3,7 @@
 * PMEM cache方案设计
 
 ### 参考资料
+* llpl库资料 - https://github.com/pmem/llpl
 * JDK核心JAVA源码解析（5） - JAVA File MMAP原理解析 - https://zhuanlan.zhihu.com/p/258934554
 * Linux中的Page Cache [一] - https://zhuanlan.zhihu.com/p/68071761
 * Kafka存储模型 - https://blog.csdn.net/FlyingAngelet/article/details/84761466
