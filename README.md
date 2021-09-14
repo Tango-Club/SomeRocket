@@ -1,3 +1,7 @@
+### TODOLIST
+* DiskStorage实现类kafka的page分割
+* PMEM cache方案设计
+
 ### 参考资料
 * JDK核心JAVA源码解析（5） - JAVA File MMAP原理解析 - https://zhuanlan.zhihu.com/p/258934554
 * Linux中的Page Cache [一] - https://zhuanlan.zhihu.com/p/68071761
