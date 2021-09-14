@@ -11,8 +11,10 @@
 ### 当前存储结构
 
 ##### 内存(8G)
-* StorageEngine等对象
+* TopicQueueIdMap/StorageEngine 等内存对象
+* 系统级的cache
 ##### PMEM(126G)
+
 ##### SSD(400G)
 * 冷数据
   - binary data
