@@ -42,7 +42,7 @@ public class CorrectTest {
 			Assert.assertEquals(1, mp.size());
 			Assert.assertEquals("2024", Common.getString(mp.get(0)));
 
-			messageQueue = new DefaultMessageQueueImpl();
+			messageQueue = new DefaultMessageQueueImpl(); // simulate restart
 
 			mp = messageQueue.getRange("a", 1000, 1, 2);
 			Assert.assertEquals(0, mp.size());

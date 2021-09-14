@@ -30,6 +30,7 @@ public class StorageEngine {
 		offsetFile = new RandomAccessFile(offsetPath, "rw");
 
 		if (exist) {
+			logger.info("reload: " + dataPath + ", " + offsetPath);
 			dataNumber = (long) (offsetFile.length() / 8) - 1;
 			lastOffset = getOffsetByIndex(dataNumber);
 		} else {
