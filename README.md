@@ -1,5 +1,5 @@
 ### TODOLIST
-* DiskStorage实现类kafka的page分割(根据部分资料表明,磁盘中page大小宜为64byte,pmem中宜为256byte)
+* DiskStorage实现类kafka的page分割
 * PMEM cache方案设计
 
 ### 参考资料
@@ -7,6 +7,11 @@
 * JDK核心JAVA源码解析（5） - JAVA File MMAP原理解析 - https://zhuanlan.zhihu.com/p/258934554
 * Linux中的Page Cache [一] - https://zhuanlan.zhihu.com/p/68071761
 * Kafka存储模型 - https://blog.csdn.net/FlyingAngelet/article/details/84761466
+
+### 资料总结
+
+* pmem一次读写块大小256byte时读写性能较好。
+* pmem写入线程数为8时可以达到最大性能。
 
 ### 当前存储结构
 
