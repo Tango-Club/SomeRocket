@@ -1,5 +1,5 @@
 ### TODOLIST
-* DiskStorage实现类kafka的page分割
+* DiskStorage实现类kafka的page分割(根据部分资料表明,磁盘中page大小宜为64byte,pmem中宜为256byte)
 * PMEM cache方案设计
 
 ### 参考资料
