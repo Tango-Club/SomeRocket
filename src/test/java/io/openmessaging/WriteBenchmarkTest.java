@@ -18,7 +18,7 @@ public class WriteBenchmarkTest {
 		int queueId = 123;
 
 		try {
-			for (int i = 0; i < 1000; i++)
+			for (int i = 0; i < 100000; i++)
 				messageQueue.append(topic, queueId, Common.getByteBuffer(text));
 
 			Map<Integer, ByteBuffer> resultMap = messageQueue.getRange(topic, queueId, 0, 1);

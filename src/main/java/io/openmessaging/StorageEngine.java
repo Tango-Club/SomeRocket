@@ -1,5 +1,6 @@
 package io.openmessaging;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -7,12 +8,22 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 public class StorageEngine {
+	String dataPath;
+	String offsetPath;
+
 	RandomAccessFile dataFile;
 	RandomAccessFile offsetFile;
 	long dataNumber;
 	long lastOffset;
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
+
+	private void flush() throws IOException{
+		dataFile.close();
+		offsetFile.close();
+		dataFile = new RandomAccessFile(dataPath, "rw");
+		offsetFile = new RandomAccessFile(offsetPath, "rw");
+	}
 
 	private long getOffsetByIndex(long x) throws IOException {
 		offsetFile.seek(x * 8);
@@ -25,6 +36,8 @@ public class StorageEngine {
 	}
 
 	StorageEngine(String dataPath, String offsetPath, boolean exist) throws IOException {
+		this.dataPath=dataPath;
+		this.offsetPath=offsetPath;
 
 		dataFile = new RandomAccessFile(dataPath, "rw");
 		offsetFile = new RandomAccessFile(offsetPath, "rw");
@@ -50,6 +63,8 @@ public class StorageEngine {
 		dataFile.write(data);
 
 		appendOffset(lastOffset);
+
+		flush();
 		dataNumber++;
 		return dataNumber - 1;
 	}
