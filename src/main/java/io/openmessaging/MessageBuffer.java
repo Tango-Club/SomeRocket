@@ -3,12 +3,14 @@ package io.openmessaging;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 
 public class MessageBuffer {
 	DiskStorage storage;
-	LlplCache cache;
+	DiskStorage cache;
 	String topic;
 	int queueId;
+	boolean isReload;
 
 	private boolean checkHot() {
 		// TODO: Complete the hot algorithm
@@ -19,22 +21,32 @@ public class MessageBuffer {
 		this.topic = topic;
 		this.queueId = queueId;
 
-		storage = new DiskStorage(topic, queueId);
-		cache = new LlplCache(topic, queueId);
+		storage = new DiskStorage(topic, queueId, "/essd", true);
+		cache = new DiskStorage(topic, queueId, "/essd/cache", false);
+		isReload = cache.engine.isReload();
 	}
 
 	public long appendData(ByteBuffer data) throws IOException {
-		long pos = storage.writeToDisk(data);
-		if (checkHot())
-			cache.writeToDisk(data);
+		if (isReload) {
+			return storage.writeToDisk(data);
+		}
+		long pos = cache.writeToDisk(data);
+		data.flip();
+		CompletableFuture.runAsync(() -> {
+			try {
+				storage.writeToDisk(data);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
 		return pos;
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(long offset, int fetchNum) {
-		if (cache.inLlpl(offset, fetchNum)) {
-			return cache.readFromDisk(offset, fetchNum);
-		} else {
+		if (isReload) {
 			return storage.readFromDisk(offset, fetchNum);
+		} else {
+			return cache.readFromDisk(offset, fetchNum);
 		}
 	}
 }

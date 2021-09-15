@@ -7,8 +7,9 @@ import java.util.HashMap;
 public class DiskStorage {
 	StorageEngine engine;
 
-	DiskStorage(String topic, int queueId) throws IOException {
-		String pathPre = "/essd/ds_" + topic + "_" + Integer.toString(queueId);
+	DiskStorage(String topic, int queueId, String basePath, boolean isStorage) throws IOException {
+		initDirectory(basePath);
+		String pathPre = basePath + "/ds_" + topic + "_" + Integer.toString(queueId);
 
 		String dataPath = pathPre + ".data";
 		initPath(dataPath);
@@ -16,18 +17,17 @@ public class DiskStorage {
 		String offsetPath = pathPre + ".offset";
 		boolean exist = initPath(offsetPath);
 
-		engine = new StorageEngine(dataPath, offsetPath, exist);
+		engine = new StorageEngine(dataPath, offsetPath, exist, isStorage);
 	}
 
-	private void initDirectory() {
-		File file = new File("/essd");
+	private void initDirectory(String basePath) {
+		File file = new File(basePath);
 		if (!file.exists()) {
 			file.mkdir();
 		}
 	}
 
 	private boolean initPath(String path) {
-		initDirectory();
 		File file = new File(path);
 		try {
 			if (!file.exists()) {

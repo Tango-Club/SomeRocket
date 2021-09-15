@@ -16,9 +16,14 @@ public class StorageEngine {
 	long dataNumber;
 	long lastOffset;
 
+	boolean isReload = false;
+	boolean alwaysFlush;
+
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
 	private void flush() throws IOException {
+		if (!alwaysFlush)
+			return;
 		dataFile.getFD().sync();
 		offsetFile.getFD().sync();
 	}
@@ -33,7 +38,12 @@ public class StorageEngine {
 		offsetFile.writeLong(offset);
 	}
 
-	StorageEngine(String dataPath, String offsetPath, boolean exist) throws IOException {
+	public boolean isReload() {
+		return isReload;
+	}
+
+	StorageEngine(String dataPath, String offsetPath, boolean exist, boolean alwaysFlush) throws IOException {
+		this.alwaysFlush = alwaysFlush;
 		this.dataPath = dataPath;
 		this.offsetPath = offsetPath;
 
@@ -42,6 +52,7 @@ public class StorageEngine {
 
 		if (exist) {
 			logger.info("reload: " + dataPath + ", " + offsetPath);
+			isReload = true;
 			dataNumber = (long) (offsetFile.length() / 8) - 1;
 			lastOffset = getOffsetByIndex(dataNumber);
 		} else {
