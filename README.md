@@ -1,4 +1,5 @@
 ### TODOLIST
+* stage2断电测试不通过,可能是RandomAccessFile(path, "rw")没有及时落盘。
 * DiskStorage实现类kafka的page分割
 * PMEM cache方案设计
 
