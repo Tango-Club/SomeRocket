@@ -19,10 +19,8 @@ public class StorageEngine {
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
 	private void flush() throws IOException {
-		dataFile.close();
-		offsetFile.close();
-		dataFile = new RandomAccessFile(dataPath, "rw");
-		offsetFile = new RandomAccessFile(offsetPath, "rw");
+		dataFile.getFD().sync();
+		offsetFile.getFD().sync();
 	}
 
 	private long getOffsetByIndex(long x) throws IOException {
