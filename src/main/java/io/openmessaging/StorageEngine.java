@@ -1,10 +1,11 @@
 package io.openmessaging;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
+
 import org.apache.log4j.Logger;
 
 public class StorageEngine {
@@ -24,8 +25,15 @@ public class StorageEngine {
 	private void flush() throws IOException {
 		if (!alwaysFlush)
 			return;
-		dataFile.getFD().sync();
-		offsetFile.getFD().sync();
+		CompletableFuture.runAsync(() -> {
+			//logger.info("flush: " + dataPath + ", " + offsetPath + ", dataNumber: " + dataNumber);
+			try {
+				dataFile.getFD().sync();
+				offsetFile.getFD().sync();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
 	}
 
 	private long getOffsetByIndex(long x) throws IOException {
@@ -51,10 +59,10 @@ public class StorageEngine {
 		offsetFile = new RandomAccessFile(offsetPath, "rw");
 
 		if (exist) {
-			logger.info("reload: " + dataPath + ", " + offsetPath);
 			isReload = true;
 			dataNumber = (long) (offsetFile.length() / 8) - 1;
 			lastOffset = getOffsetByIndex(dataNumber);
+			logger.info("reload: " + dataPath + ", " + offsetPath + ", dataNumber: " + dataNumber);
 		} else {
 			dataNumber = 0;
 			lastOffset = 0;
@@ -104,7 +112,8 @@ public class StorageEngine {
 		fetchNum = (int) Math.min((long) fetchNum, dataNumber - index);
 		HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
 		try {
-			dataFile.seek(getOffsetByIndex(index));
+			if (fetchNum > 0)
+				dataFile.seek(getOffsetByIndex(index));
 			for (int i = 0; i < fetchNum; i++) {
 				result.put(i, getDataByIndexNoSeek(i + index));
 			}

@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.log4j.Logger;
 
 public class MessageBuffer {
 	DiskStorage storage;
@@ -11,6 +15,8 @@ public class MessageBuffer {
 	String topic;
 	int queueId;
 	boolean isReload;
+	private static Logger logger = Logger.getLogger(MessageBuffer.class);
+	private Lock lock = new ReentrantLock();
 
 	private boolean checkHot() {
 		// TODO: Complete the hot algorithm
@@ -31,14 +37,8 @@ public class MessageBuffer {
 			return storage.writeToDisk(data);
 		}
 		long pos = cache.writeToDisk(data);
-		data.flip();
-		CompletableFuture.runAsync(() -> {
-			try {
-				storage.writeToDisk(data);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
+		data.position(0);
+		storage.writeToDisk(data);
 		return pos;
 	}
 
