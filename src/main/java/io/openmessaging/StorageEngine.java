@@ -18,7 +18,7 @@ public class StorageEngine {
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
-	private void flush() throws IOException{
+	private void flush() throws IOException {
 		dataFile.close();
 		offsetFile.close();
 		dataFile = new RandomAccessFile(dataPath, "rw");
@@ -36,8 +36,8 @@ public class StorageEngine {
 	}
 
 	StorageEngine(String dataPath, String offsetPath, boolean exist) throws IOException {
-		this.dataPath=dataPath;
-		this.offsetPath=offsetPath;
+		this.dataPath = dataPath;
+		this.offsetPath = offsetPath;
 
 		dataFile = new RandomAccessFile(dataPath, "rw");
 		offsetFile = new RandomAccessFile(offsetPath, "rw");
