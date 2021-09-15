@@ -3,6 +3,8 @@ package io.openmessaging;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 
@@ -12,8 +14,8 @@ public class StorageEngine {
 	String dataPath;
 	String offsetPath;
 
-	RandomAccessFile dataFile;
-	RandomAccessFile offsetFile;
+	MappedByteBuffer  dataFile;
+	MappedByteBuffer offsetFile;
 	long dataNumber;
 	long lastOffset;
 
@@ -25,25 +27,18 @@ public class StorageEngine {
 	private void flush() throws IOException {
 		if (!alwaysFlush)
 			return;
-		CompletableFuture.runAsync(() -> {
-			//logger.info("flush: " + dataPath + ", " + offsetPath + ", dataNumber: " + dataNumber);
-			try {
-				dataFile.getFD().sync();
-				offsetFile.getFD().sync();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		});
+		dataFile.force();
+		offsetFile.force();
 	}
 
 	private long getOffsetByIndex(long x) throws IOException {
-		offsetFile.seek(x * 8);
-		return offsetFile.readLong();
+		offsetFile.position((int) (x*8));
+		return offsetFile.getLong();
 	}
 
 	private void appendOffset(long offset) throws IOException {
-		offsetFile.seek(offsetFile.length());
-		offsetFile.writeLong(offset);
+		offsetFile.position(offsetFile.limit());
+		offsetFile.putLong(offset);
 	}
 
 	public boolean isReload() {
@@ -55,12 +50,12 @@ public class StorageEngine {
 		this.dataPath = dataPath;
 		this.offsetPath = offsetPath;
 
-		dataFile = new RandomAccessFile(dataPath, "rw");
-		offsetFile = new RandomAccessFile(offsetPath, "rw");
+		dataFile = new RandomAccessFile(dataPath, "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 64*1024);
+		offsetFile = new RandomAccessFile(offsetPath, "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 64*1024);
 
 		if (exist) {
 			isReload = true;
-			dataNumber = (long) (offsetFile.length() / 8) - 1;
+			dataNumber = (long) (offsetFile.limit() / 8) - 1;
 			lastOffset = getOffsetByIndex(dataNumber);
 			logger.info("reload: " + dataPath + ", " + offsetPath + ", dataNumber: " + dataNumber);
 		} else {
@@ -68,16 +63,14 @@ public class StorageEngine {
 			lastOffset = 0;
 			appendOffset(0);
 		}
-		dataFile.seek(lastOffset);
+		dataFile.position((int) lastOffset);
 	}
 
 	public synchronized long write(ByteBuffer buffer) throws IOException {
-		dataFile.seek(dataFile.length());
+		dataFile.position(dataFile.limit());
 		lastOffset += buffer.capacity();
-		byte[] data = new byte[buffer.capacity()];
 
-		buffer.get(data);
-		dataFile.write(data);
+		dataFile.put(buffer);
 
 		appendOffset(lastOffset);
 
@@ -89,7 +82,7 @@ public class StorageEngine {
 	public ByteBuffer readNoSeek(int length) throws IOException {
 		ByteBuffer buffer = ByteBuffer.allocate(length);
 		byte[] data = new byte[length];
-		dataFile.read(data);
+		dataFile.get(data);
 		buffer.put(data);
 		buffer.flip();
 		return buffer;
@@ -103,7 +96,7 @@ public class StorageEngine {
 
 	public ByteBuffer getDataByIndex(long index) throws IOException {
 		long offset = getOffsetByIndex(index);
-		dataFile.seek(offset);
+		dataFile.position((int) offset);
 		int length = (int) (getOffsetByIndex(index + 1) - offset);
 		return readNoSeek(length);
 	}
@@ -113,7 +106,7 @@ public class StorageEngine {
 		HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
 		try {
 			if (fetchNum > 0)
-				dataFile.seek(getOffsetByIndex(index));
+				dataFile.position((int) getOffsetByIndex(index));
 			for (int i = 0; i < fetchNum; i++) {
 				result.put(i, getDataByIndexNoSeek(i + index));
 			}
