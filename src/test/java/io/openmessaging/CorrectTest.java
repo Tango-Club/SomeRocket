@@ -12,7 +12,7 @@ public class CorrectTest {
 
 	@Test
 	public void main0() {
-		Common.cleanStorage();
+		Common.cleanPath("/essd/");
 		try {
 			long res = -1;
 

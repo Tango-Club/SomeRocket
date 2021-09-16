@@ -1,9 +1,13 @@
 package io.openmessaging;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 
 public class Common {
+	static int pageSize = 15;
+
 	public static ByteBuffer cloneByteBuffer(final ByteBuffer original) {
 		// Create clone with same capacity as original.
 		final ByteBuffer clone = (original.isDirect()) ? ByteBuffer.allocateDirect(original.capacity())
@@ -22,14 +26,43 @@ public class Common {
 		return clone;
 	}
 
-	public static void cleanStorage() {
-		File file = new File("/essd");
-		if (!file.exists())
+	private static void deleteDir(File file) {
+		File[] contents = file.listFiles();
+		if (contents == null) {
+			file.delete();
 			return;
-		String[] children = file.list();
-		for (int i = 0; i < children.length; i++) {
-			new File(file, children[i]).delete();
 		}
+
+		for (File f : contents) {
+			if (!Files.isSymbolicLink(f.toPath())) {
+				deleteDir(f);
+			}
+		}
+
+		file.delete();
+	}
+
+	public static void cleanPath(String path) {
+		File file = new File(path);
+		deleteDir(file);
+	}
+
+	public static boolean initDirectory(String basePath) {
+		File file = new File(basePath);
+		if (!file.exists()) {
+			file.mkdir();
+			return true;
+		}
+		return false;
+	}
+
+	public static boolean initPath(String path) throws IOException {
+		File file = new File(path);
+		if (!file.exists()) {
+			file.createNewFile();
+			return true;
+		}
+		return false;
 	}
 
 	public static ByteBuffer getByteBuffer(String str) {

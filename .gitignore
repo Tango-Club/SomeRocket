@@ -6,11 +6,4 @@ target/
 .logs/debug.log
 .logs/error.log
 ./persistent_heap
-storage/ds_TestTopic_123.offset
-storage/ds_TestTopic_123.data
-storage/ds_b_1001.offset
-storage/ds_a_1000.data
-storage/ds_a_1000.offset
-storage/ds_a_1001.data
-storage/ds_b_1001.data
-storage/ds_a_1001.offset
+

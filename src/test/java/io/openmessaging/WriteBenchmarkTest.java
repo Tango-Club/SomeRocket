@@ -12,7 +12,9 @@ public class WriteBenchmarkTest {
 
 	@Test
 	public void main0() {
-		Common.cleanStorage();
+
+		Common.cleanPath("/essd/");
+
 		String text = "Hello Message Queue!";
 		String topic = "TestTopic";
 		int queueId = 123;
@@ -32,5 +34,6 @@ public class WriteBenchmarkTest {
 			e.printStackTrace();
 			Assert.fail();
 		}
+
 	} // End of main function
 }
