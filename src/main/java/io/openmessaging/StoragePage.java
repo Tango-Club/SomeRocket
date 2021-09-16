@@ -29,6 +29,7 @@ public class StoragePage {
 
 	boolean isReload = false;
 	boolean alwaysFlush;
+	boolean isMaped=false;
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
@@ -81,12 +82,16 @@ public class StoragePage {
 	}
 
 	public void map() throws FileNotFoundException, IOException {
+		if(isMaped)return;
+		isMaped=true;
 		dataFile = new RandomAccessFile(dataPath, "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 256 * 1024);
 		offsetFile = new RandomAccessFile(offsetPath, "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0,
 				(Common.pageSize + 1) * 4);
 	}
 
 	public void unmap() {
+		if(!isMaped)return;
+		isMaped=false;
 		cleanMappedByteBuffer(dataFile);
 		cleanMappedByteBuffer(offsetFile);
 	}
