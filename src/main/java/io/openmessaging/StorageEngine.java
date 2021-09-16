@@ -113,7 +113,8 @@ public class StorageEngine {
 			int pageFetchNum = Math.min(fetchNum, pages.get(pageId).dataNumber - pageIndex);
 			// logger.info("page fetch: " + pageFetchNum);
 			try {
-				pages.get(pageId).map();
+				if (pageId != pages.size())
+					pages.get(pageId).map();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -121,6 +122,8 @@ public class StorageEngine {
 			}
 			result.putAll(pages.get(pageId).getRange(pageIndex, pageFetchNum, readed));
 			pageIndex += pageFetchNum;
+			if (pageId != pages.size())
+				pages.get(pageId).unmap();
 			if (pageIndex == pages.get(pageId).dataNumber) {
 				pageIndex = 0;
 				pageId++;
