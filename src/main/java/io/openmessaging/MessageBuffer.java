@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
-v
 public class MessageBuffer {
 	DiskStorage storage;
 	DiskStorage cache;
