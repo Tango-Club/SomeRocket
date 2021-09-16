@@ -105,17 +105,18 @@ public class StorageEngine {
 		int pageIndex = (int) (index - dataNumPre.get(pageId));
 		// logger.info("binary serch: pageId = " + pageId + ", pageIndex = " +
 		// pageIndex);
-
+		int readed=0;
 		while (fetchNum > 0) {
 			int pageFetchNum = Math.min(fetchNum, pages.get(pageId).dataNumber - pageIndex);
 			// logger.info("page fetch: " + pageFetchNum);
-			result.putAll(pages.get(pageId).getRange(pageIndex, pageFetchNum));
+			result.putAll(pages.get(pageId).getRange(pageIndex, pageFetchNum,readed));
 			pageIndex += pageFetchNum;
 			if (pageIndex == pages.get(pageId).dataNumber) {
 				pageIndex = 0;
 				pageId++;
 			}
 			fetchNum -= pageFetchNum;
+			readed+=pageFetchNum;
 		}
 		return result;
 	}

@@ -104,12 +104,12 @@ public class StoragePage {
         return readNoSeek(length);
     }
 
-    public synchronized HashMap<Integer, ByteBuffer> getRange(int index, int fetchNum) {
+    public synchronized HashMap<Integer, ByteBuffer> getRange(int index, int fetchNum, int preFix) {
         HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
         try {
             dataFile.position(getOffsetByIndex(index));
             for (int i = 0; i < fetchNum; i++) {
-                result.put(i, getDataByIndexNoSeek(i + index));
+                result.put(preFix + i, getDataByIndexNoSeek(i + index));
             }
         } catch (IOException e) {
             e.printStackTrace();
