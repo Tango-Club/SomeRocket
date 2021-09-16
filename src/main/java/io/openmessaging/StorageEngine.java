@@ -1,5 +1,6 @@
 package io.openmessaging;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -73,6 +74,8 @@ public class StorageEngine {
 		// logger.info("page limit: " + getLastPage().dataNumber + "," +
 		// Common.pageSize);
 		if (pages.size() == 0 || getLastPage().dataNumber == Common.pageSize) {
+			if (!pages.isEmpty())
+				getLastPage().unmap();
 			String pagePath = storagePath + "/" + Integer.toString(pages.size());
 			pages.add(new StoragePage(pagePath, false, alwaysFlush, 0));
 			dataNumPre.add(getDataNum());
@@ -105,18 +108,25 @@ public class StorageEngine {
 		int pageIndex = (int) (index - dataNumPre.get(pageId));
 		// logger.info("binary serch: pageId = " + pageId + ", pageIndex = " +
 		// pageIndex);
-		int readed=0;
+		int readed = 0;
 		while (fetchNum > 0) {
 			int pageFetchNum = Math.min(fetchNum, pages.get(pageId).dataNumber - pageIndex);
 			// logger.info("page fetch: " + pageFetchNum);
-			result.putAll(pages.get(pageId).getRange(pageIndex, pageFetchNum,readed));
+			try {
+				pages.get(pageId).map();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			result.putAll(pages.get(pageId).getRange(pageIndex, pageFetchNum, readed));
 			pageIndex += pageFetchNum;
 			if (pageIndex == pages.get(pageId).dataNumber) {
 				pageIndex = 0;
 				pageId++;
 			}
 			fetchNum -= pageFetchNum;
-			readed+=pageFetchNum;
+			readed += pageFetchNum;
 		}
 		return result;
 	}
