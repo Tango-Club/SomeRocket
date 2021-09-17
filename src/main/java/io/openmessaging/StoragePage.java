@@ -32,6 +32,7 @@ final public class StoragePage {
 
 	private void unmap(MappedByteBuffer buffer) {
 		((sun.nio.ch.DirectBuffer) buffer).cleaner().clean();
+		buffer=null;
     }
 
 	public void flush() throws IOException {
