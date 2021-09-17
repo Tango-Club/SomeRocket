@@ -22,6 +22,8 @@ final public class StoragePage {
 
 	MappedByteBuffer dataFile;
 	MappedByteBuffer offsetFile;
+	RandomAccessFile rdataFile;
+	RandomAccessFile roffsetFile;
 	int dataNumber;
 	int lastOffset;
 
@@ -32,8 +34,8 @@ final public class StoragePage {
 
 	private void unmap(MappedByteBuffer buffer) {
 		((sun.nio.ch.DirectBuffer) buffer).cleaner().clean();
-		buffer=null;
-    }
+		
+	}
 
 	public void flush() throws IOException {
 		dataFile.force();
@@ -87,10 +89,10 @@ final public class StoragePage {
 			return;
 		isMaped = true;
 		try {
-			dataFile = new RandomAccessFile(dataPath, "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0,
-					Common.pageSize);
-			offsetFile = new RandomAccessFile(offsetPath, "rw").getChannel().map(FileChannel.MapMode.READ_WRITE, 0,
-					4 * 1024 * 4);
+			rdataFile = new RandomAccessFile(dataPath, "rw");
+			roffsetFile = new RandomAccessFile(offsetPath, "rw");
+			dataFile = rdataFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, Common.pageSize);
+			offsetFile = roffsetFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 4 * 1024 * 4);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -102,6 +104,13 @@ final public class StoragePage {
 		if (!isMaped)
 			return;
 		isMaped = false;
+		try {
+			rdataFile.close();
+			roffsetFile.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		unmap(dataFile);
 		unmap(offsetFile);
 	}
