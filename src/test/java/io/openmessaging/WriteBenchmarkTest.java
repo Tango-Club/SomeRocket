@@ -14,13 +14,14 @@ public class WriteBenchmarkTest {
 	public void main0() {
 
 		Common.cleanPath("/essd/");
+		Common.cleanPath("/pmem/");
 
 		String text = "Hello Message Queue!";
 		String topic = "TestTopic";
 		int queueId = 123;
 
 		try {
-			int x = 100;
+			int x = 1000;
 			for (int i = 0; i < x; i++)
 				messageQueue.append(topic, queueId, Common.getByteBuffer(text));
 			

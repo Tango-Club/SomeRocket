@@ -3,7 +3,7 @@
 *.jar
 *.iml
 target/
-.logs/debug.log
-.logs/error.log
+.logs/*
+.logs/*
 ./persistent_heap
 

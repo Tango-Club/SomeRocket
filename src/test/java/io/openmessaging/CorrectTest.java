@@ -12,7 +12,9 @@ public class CorrectTest {
 
 	@Test
 	public void main0() {
+		
 		Common.cleanPath("/essd/");
+		Common.cleanPath("/pmem/");
 		try {
 			long res = -1;
 

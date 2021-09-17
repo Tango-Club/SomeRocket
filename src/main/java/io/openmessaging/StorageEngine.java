@@ -1,8 +1,8 @@
 package io.openmessaging;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.SyncFailedException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +21,18 @@ public class StorageEngine {
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
+	public void flush(){
+		try {
+			metaFile.getFD().sync();
+		} catch (SyncFailedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public boolean isReload() {
 		return isReload;
 	}
@@ -54,30 +66,28 @@ public class StorageEngine {
 		dataNumPre.add(0L);
 		if (exist) {
 			isReload = true;
-			metaFile = new RandomAccessFile(storagePath + "/meta", "rwd");
+			metaFile = new RandomAccessFile(storagePath + "/meta", "rw");
 			metaFile.seek(0);
 			for (int pageId = 0; pageId < metaFile.length() / 4; pageId++) {
 				String pagePath = storagePath + "/" + Integer.toString(pageId);
-				pages.add(new StoragePage(pagePath, true, alwaysFlush, metaFile.readInt()));
+				pages.add(new StoragePage(pagePath, true, metaFile.readInt()));
 				dataNumPre.add(getDataNum() + getLastPage().dataNumber);
 			}
 			// logger.info("reload: pageNum = " + pages.size() + ", dataNum = " +
 			// getDataNum());
 		} else {
 			Common.initPath(storagePath + "/meta");
-			metaFile = new RandomAccessFile(storagePath + "/meta", "rwd");
+			metaFile = new RandomAccessFile(storagePath + "/meta", "rw");
 		}
 	}
 
-	public synchronized long write(ByteBuffer buffer) throws IOException {
+	public long write(ByteBuffer buffer) throws IOException {
 		// if (pages.size() != 0)
 		// logger.info("page limit: " + getLastPage().dataNumber + "," +
 		// Common.pageSize);
-		if (pages.size() == 0 || getLastPage().dataNumber == Common.pageSize) {
-			if (!pages.isEmpty())
-				getLastPage().unmap();
+		if (pages.size() == 0 || getLastPage().lastOffset+buffer.capacity()>Common.pageSize) {
 			String pagePath = storagePath + "/" + Integer.toString(pages.size());
-			pages.add(new StoragePage(pagePath, false, alwaysFlush, 0));
+			pages.add(new StoragePage(pagePath, false, 0));
 			dataNumPre.add(getDataNum());
 			metaFile.seek(metaFile.length());
 			metaFile.writeInt(0);
@@ -85,10 +95,12 @@ public class StorageEngine {
 		setPageDataNum(pages.size() - 1, getPageDataNum(pages.size() - 1) + 1);
 		getLastPage().write(buffer);
 		updateDataNum();
+		flush();
+		getLastPage().flush();
 		return getDataNum() - 1;
 	}
 
-	public synchronized HashMap<Integer, ByteBuffer> getRange(long index, int fetchNum) {
+	public HashMap<Integer, ByteBuffer> getRange(long index, int fetchNum) {
 		fetchNum = (int) Math.min((long) fetchNum, getDataNum() - index);
 		HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
 		if (fetchNum <= 0)
@@ -112,18 +124,8 @@ public class StorageEngine {
 		while (fetchNum > 0) {
 			int pageFetchNum = Math.min(fetchNum, pages.get(pageId).dataNumber - pageIndex);
 			// logger.info("page fetch: " + pageFetchNum);
-			try {
-				if (pageId != pages.size())
-					pages.get(pageId).map();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
 			result.putAll(pages.get(pageId).getRange(pageIndex, pageFetchNum, readed));
 			pageIndex += pageFetchNum;
-			if (pageId != pages.size())
-				pages.get(pageId).unmap();
 			if (pageIndex == pages.get(pageId).dataNumber) {
 				pageIndex = 0;
 				pageId++;

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import org.apache.log4j.Logger;
+
 public class MessageBuffer {
 	DiskStorage storage;
 	DiskStorage cache;
@@ -21,25 +22,26 @@ public class MessageBuffer {
 		this.topic = topic;
 		this.queueId = queueId;
 		Common.initDirectory("/essd");
-		// storage = new DiskStorage(topic, queueId, "/essd/storage", true);
-		cache = new DiskStorage(topic, queueId, "/essd/cache", true);
+		Common.initDirectory("/pmem");
+		storage = new DiskStorage(topic, queueId, "/essd/storage", true);
+		cache = new DiskStorage(topic, queueId, "/pmem/cache", true);
 		isReload = cache.engine.isReload();
 	}
 
 	public long appendData(ByteBuffer data) throws IOException {
+		if (isReload) {
+			return storage.writeToDisk(data);
+		}
+		storage.writeToDisk(data);
+		data.position(0);
 		return cache.writeToDisk(data);
-		/*
-		 * if (isReload) { return storage.writeToDisk(data); } //
-		 * storage.writeToDisk(Common.cloneByteBuffer(data)); long pos =
-		 * cache.writeToDisk(data); return pos;
-		 */
+
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(long offset, int fetchNum) {
+		if (isReload) {
+			return storage.readFromDisk(offset, fetchNum);
+		} 
 		return cache.readFromDisk(offset, fetchNum);
-		/*
-		 * if (isReload) { return storage.readFromDisk(offset, fetchNum); } else {
-		 * return cache.readFromDisk(offset, fetchNum); }
-		 */
 	}
 }

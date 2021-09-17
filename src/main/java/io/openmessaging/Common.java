@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 
-public class Common {
-	static int pageSize = 15;
+public abstract class Common {
+	final static int pageSize = 256 * 1024;
 
 	public static ByteBuffer cloneByteBuffer(final ByteBuffer original) {
 		// Create clone with same capacity as original.
