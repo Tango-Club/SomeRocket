@@ -30,6 +30,10 @@ final public class StoragePage {
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
+	private void unmap(MappedByteBuffer buffer) {
+		((sun.nio.ch.DirectBuffer) buffer).cleaner().clean();
+    }
+
 	public void flush() throws IOException {
 		dataFile.force();
 		offsetFile.force();
@@ -97,8 +101,8 @@ final public class StoragePage {
 		if (!isMaped)
 			return;
 		isMaped = false;
-		cleanMappedByteBuffer(dataFile);
-		cleanMappedByteBuffer(offsetFile);
+		unmap(dataFile);
+		unmap(offsetFile);
 	}
 
 	StoragePage(String basePath, boolean exist, int dataNumber) throws IOException {
