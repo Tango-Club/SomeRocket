@@ -24,15 +24,14 @@ public class WriteBenchmarkTest {
 			int x = 1000;
 			for (int i = 0; i < x; i++)
 				messageQueue.append(topic, queueId, Common.getByteBuffer(text));
-			
-			Map<Integer, ByteBuffer> resultMap = messageQueue.getRange(topic, queueId, 0, x);
-			
-			Assert.assertEquals(x, resultMap.size());
+
 			for (int i = 0; i < x; i++) {
-				String msgRead = Common.getString(resultMap.get(i));
+				Map<Integer, ByteBuffer> resultMap = messageQueue.getRange(topic, queueId, i, 1);
+				Assert.assertEquals(1, resultMap.size());
+				String msgRead = Common.getString(resultMap.get(0));
 				Assert.assertEquals(msgRead, text);
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
