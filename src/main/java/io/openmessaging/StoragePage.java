@@ -12,18 +12,11 @@ final public class StoragePage {
 	String dataPath;
 	String offsetPath;
 
-<<<<<<< HEAD
-	MappedByteBuffer dataFile;
-	MappedByteBuffer offsetFile;
-	RandomAccessFile rdataFile;
-	RandomAccessFile roffsetFile;
-=======
 	RandomAccessFile dataFile;
 	RandomAccessFile offsetFile;
 
 	FileChannel dataFileChannel;
 
->>>>>>> 3e08b3b806ee7dc170e1ea7a04b7dbbac5e21ca8
 	int dataNumber;
 	int lastOffset;
 
@@ -31,11 +24,6 @@ final public class StoragePage {
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
-<<<<<<< HEAD
-	private void unmap(MappedByteBuffer buffer) {
-		((sun.nio.ch.DirectBuffer) buffer).cleaner().clean();
-		
-=======
 	public void open() {
 		try {
 			dataFile = new RandomAccessFile(dataPath, "rw");
@@ -54,7 +42,6 @@ final public class StoragePage {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
->>>>>>> 3e08b3b806ee7dc170e1ea7a04b7dbbac5e21ca8
 	}
 
 	public void flush() throws IOException {
@@ -76,69 +63,7 @@ final public class StoragePage {
 		return isReload;
 	}
 
-<<<<<<< HEAD
-	public static void cleanMappedByteBuffer(ByteBuffer buffer) {
-		try {
-			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
-				@Override
-				public Object run() throws Exception {
-					final Class<?> unsafeClass = Class.forName("sun.misc.Unsafe");
-					// we do not need to check for a specific class, we can call the Unsafe method
-					// with any buffer class
-					MethodHandle unmapper = MethodHandles.lookup().findVirtual(unsafeClass, "invokeCleaner",
-							MethodType.methodType(void.class, ByteBuffer.class));
-					// fetch the unsafe instance and bind it to the virtual MethodHandle
-					final Field f = unsafeClass.getDeclaredField("theUnsafe");
-					f.setAccessible(true);
-					final Object theUnsafe = f.get(null);
-					try {
-						unmapper.bindTo(theUnsafe).invokeExact(buffer);
-						return null;
-					} catch (Throwable t) {
-						throw new RuntimeException(t);
-					}
-				}
-			});
-		} catch (PrivilegedActionException e) {
-			throw new RuntimeException("Unable to unmap the mapped buffer", e);
-		}
-	}
-
-	public void map() {
-		if (isMaped)
-			return;
-		isMaped = true;
-		try {
-			rdataFile = new RandomAccessFile(dataPath, "rw");
-			roffsetFile = new RandomAccessFile(offsetPath, "rw");
-			dataFile = rdataFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, Common.pageSize);
-			offsetFile = roffsetFile.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, 4 * 1024 * 4);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public void unmap() {
-		if (!isMaped)
-			return;
-		isMaped = false;
-		try {
-			rdataFile.close();
-			roffsetFile.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		unmap(dataFile);
-		unmap(offsetFile);
-	}
-
-	StoragePage(String basePath, boolean exist, int dataNumber) throws IOException {
-=======
 	StoragePage(String basePath, boolean exist) throws IOException {
->>>>>>> 3e08b3b806ee7dc170e1ea7a04b7dbbac5e21ca8
 		this.dataPath = basePath + ".data";
 		this.offsetPath = basePath + ".offset";
 		Common.initPath(dataPath);
