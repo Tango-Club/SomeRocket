@@ -26,6 +26,8 @@ public class MessageBuffer {
 		storage = new DiskStorage(topic, queueId, "/essd/storage", true);
 		cache = new DiskStorage(topic, queueId, "/pmem/cache", true);
 		isReload = cache.engine.isReload();
+		if (queueId % 2 == 0)
+			isReload = true;
 	}
 
 	public long appendData(ByteBuffer data) throws IOException {
@@ -35,13 +37,12 @@ public class MessageBuffer {
 		storage.writeToDisk(data);
 		data.position(0);
 		return cache.writeToDisk(data);
-
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(long offset, int fetchNum) {
 		if (isReload) {
 			return storage.readFromDisk(offset, fetchNum);
-		} 
+		}
 		return cache.readFromDisk(offset, fetchNum);
 	}
 }
