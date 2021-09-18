@@ -4,59 +4,79 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.security.AccessController;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.util.HashMap;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
-import java.lang.reflect.Field;
 import org.apache.log4j.Logger;
 
 final public class StoragePage {
 	String dataPath;
 	String offsetPath;
 
+<<<<<<< HEAD
 	MappedByteBuffer dataFile;
 	MappedByteBuffer offsetFile;
 	RandomAccessFile rdataFile;
 	RandomAccessFile roffsetFile;
+=======
+	RandomAccessFile dataFile;
+	RandomAccessFile offsetFile;
+
+	FileChannel dataFileChannel;
+
+>>>>>>> 3e08b3b806ee7dc170e1ea7a04b7dbbac5e21ca8
 	int dataNumber;
 	int lastOffset;
 
-	boolean isReload = false;
-	boolean isMaped = false;
+	boolean isReload;
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
+<<<<<<< HEAD
 	private void unmap(MappedByteBuffer buffer) {
 		((sun.nio.ch.DirectBuffer) buffer).cleaner().clean();
 		
+=======
+	public void open() {
+		try {
+			dataFile = new RandomAccessFile(dataPath, "rw");
+			offsetFile = new RandomAccessFile(offsetPath, "rw");
+			dataFileChannel = dataFile.getChannel();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void close() {
+		try {
+			dataFileChannel.close();
+			dataFile.close();
+			offsetFile.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+>>>>>>> 3e08b3b806ee7dc170e1ea7a04b7dbbac5e21ca8
 	}
 
 	public void flush() throws IOException {
-		dataFile.force();
-		offsetFile.force();
-		unmap();
+		dataFileChannel.force(false);
+		offsetFile.getFD().sync();
 	}
 
 	private int getOffsetByIndex(int x) throws IOException {
-		offsetFile.position(x * 4);
-		return offsetFile.getInt();
+		offsetFile.seek(x * 4);
+		return offsetFile.readInt();
 	}
 
 	private void appendOffset(int offset) throws IOException {
-		offsetFile.position(dataNumber * 4);
-		offsetFile.putInt(offset);
+		offsetFile.seek(dataNumber * 4);
+		offsetFile.writeInt(offset);
 	}
 
 	public boolean isReload() {
 		return isReload;
 	}
 
+<<<<<<< HEAD
 	public static void cleanMappedByteBuffer(ByteBuffer buffer) {
 		try {
 			AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
@@ -116,42 +136,42 @@ final public class StoragePage {
 	}
 
 	StoragePage(String basePath, boolean exist, int dataNumber) throws IOException {
+=======
+	StoragePage(String basePath, boolean exist) throws IOException {
+>>>>>>> 3e08b3b806ee7dc170e1ea7a04b7dbbac5e21ca8
 		this.dataPath = basePath + ".data";
 		this.offsetPath = basePath + ".offset";
+		Common.initPath(dataPath);
+		Common.initPath(offsetPath);
 
-		map();
+		this.isReload = exist;
 
-		// logger.info("dataFile: " + dataFile);
-		// logger.info("offsetFile: " + dataFile);
+		open();
 
 		if (exist) {
-			this.isReload = true;
-			this.dataNumber = dataNumber;
-			this.lastOffset = getOffsetByIndex(dataNumber);
+			this.dataNumber = (int) offsetFile.length() / 4 - 1;
+			this.lastOffset = getOffsetByIndex(dataNumber - 1);
 			logger.info("reload: " + dataPath + ", " + offsetPath + ", dataNumber: " + dataNumber);
 		} else {
 			this.dataNumber = 0;
 			this.lastOffset = 0;
 			appendOffset(0);
 		}
-		unmap();
 	}
 
 	public synchronized void write(ByteBuffer buffer) throws IOException {
-		map();
-
-		dataFile.position(lastOffset);
+		dataFileChannel.position(lastOffset);
 		lastOffset += buffer.capacity();
 
 		dataNumber++;
-		dataFile.put(buffer);
+		dataFileChannel.write(buffer);
 		appendOffset(lastOffset);
 
 	}
 
 	public ByteBuffer readNoSeek(int length) throws IOException {
 		ByteBuffer buffer = ByteBuffer.allocate(length);
-		dataFile.get(buffer.array());
+		dataFileChannel.read(buffer);
 		buffer.flip();
 		return buffer;
 	}
@@ -159,29 +179,26 @@ final public class StoragePage {
 	public ByteBuffer getDataByIndexNoSeek(int index) throws IOException {
 		int offset = getOffsetByIndex(index);
 		int length = getOffsetByIndex(index + 1) - offset;
-		// logger.info(getOffsetByIndex(index)+","+getOffsetByIndex(index + 1));
 		return readNoSeek(length);
 	}
 
 	public ByteBuffer getDataByIndex(int index) throws IOException {
 		int offset = getOffsetByIndex(index);
-		dataFile.position(offset);
+		dataFileChannel.position(offset);
 		int length = getOffsetByIndex(index + 1) - offset;
 		return readNoSeek(length);
 	}
 
 	public synchronized HashMap<Integer, ByteBuffer> getRange(int index, int fetchNum, int preFix) {
 		HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
-		map();
 		try {
-			dataFile.position(getOffsetByIndex(index));
+			dataFileChannel.position(getOffsetByIndex(index));
 			for (int i = 0; i < fetchNum; i++) {
 				result.put(preFix + i, getDataByIndexNoSeek(i + index));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		unmap();
 		return result;
 	}
 }
