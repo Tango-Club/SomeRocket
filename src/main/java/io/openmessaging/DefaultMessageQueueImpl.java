@@ -11,7 +11,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 	ConcurrentHashMap<String, HashMap<Integer, MessageBuffer>> topicQueueMap = new ConcurrentHashMap<>();
 	ConcurrentHashMap<String, Map<Integer, Map<Long, ByteBuffer>>> appendData = new ConcurrentHashMap<>();
-	Runtime runTime = Runtime.getRuntime();
+
 	private void creatStorage(String topic, int queueId) {
 		if (!topicQueueMap.containsKey(topic)) {
 			topicQueueMap.put(topic, new HashMap<Integer, MessageBuffer>());
@@ -34,7 +34,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 				long tBefore = System.currentTimeMillis();
 				wait(Common.syncTime);
 				if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
-					runTime.exec("sync -d /essd");
+					new ProcessBuilder("sync", "-d", "/essd").inheritIO().start();
 					notifyAll();
 				}
 			}
