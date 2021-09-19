@@ -33,7 +33,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 				long tBefore = System.currentTimeMillis();
 				wait(Common.syncTime);
 				if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
-					Runtime.getRuntime().exec("sync -d -/essd");
+					//Runtime.getRuntime().exec("sync -d -/essd");
 					notifyAll();
 				}
 			}
