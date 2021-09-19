@@ -45,9 +45,10 @@ final public class StoragePage {
 	}
 
 	public void flush() throws IOException {
-		//Runtime.getRuntime().exec("sync");
-		dataFileChannel.force(false);
-		offsetFile.getFD().sync();
+		Runtime.getRuntime().exec("sync -d " + dataPath);
+		Runtime.getRuntime().exec("sync -d " + offsetPath);
+		// dataFileChannel.force(false);
+		// offsetFile.getFD().sync();
 	}
 
 	private int getOffsetByIndex(int x) throws IOException {
