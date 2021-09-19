@@ -24,7 +24,7 @@ public class MessageBuffer {
 		Common.initDirectory("/essd");
 		Common.initDirectory("/pmem");
 		storage = new DiskStorage(topic, queueId, "/essd/storage", true);
-		cache = new DiskStorage(topic, queueId, "/pmem/cache", true);
+		cache = new DiskStorage(topic, queueId, "/pmem/cache", false);
 		isReload = cache.engine.isReload();
 		if (queueId % 3 != 0)
 			isReload = true;
