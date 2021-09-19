@@ -85,7 +85,7 @@ final public class StoragePage {
 		}
 	}
 
-	public synchronized void write(ByteBuffer buffer) throws IOException {
+	public void write(ByteBuffer buffer) throws IOException {
 		dataFileChannel.position(lastOffset);
 		lastOffset += buffer.capacity();
 
@@ -115,7 +115,7 @@ final public class StoragePage {
 		return readNoSeek(length);
 	}
 
-	public synchronized HashMap<Integer, ByteBuffer> getRange(int index, int fetchNum, int preFix) {
+	public HashMap<Integer, ByteBuffer> getRange(int index, int fetchNum, int preFix) {
 		HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
 		try {
 			dataFileChannel.position(getOffsetByIndex(index));

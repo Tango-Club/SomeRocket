@@ -26,8 +26,8 @@ public class MessageBuffer {
 		storage = new DiskStorage(topic, queueId, "/essd/storage", true);
 		cache = new DiskStorage(topic, queueId, "/pmem/cache", true);
 		isReload = cache.engine.isReload();
-		if (queueId % 3 != 0)
-			isReload = true;
+		//if (queueId % 3 != 0)
+		isReload = true;
 	}
 
 	public long appendData(ByteBuffer data) throws IOException {
