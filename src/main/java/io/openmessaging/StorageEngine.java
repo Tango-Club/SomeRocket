@@ -74,7 +74,7 @@ public class StorageEngine {
 		}
 		getLastPage().write(buffer);
 		updateDataNum();
-		getLastPage().flush();
+		//getLastPage().flush();
 		return getDataNum() - 1;
 	}
 

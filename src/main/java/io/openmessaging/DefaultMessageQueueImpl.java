@@ -11,8 +11,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	ConcurrentHashMap<String, HashMap<Integer, MessageBuffer>> topicQueueMap = new ConcurrentHashMap<>();
 	ConcurrentHashMap<String, Map<Integer, Map<Long, ByteBuffer>>> appendData = new ConcurrentHashMap<>();
 
-	private void creatStorage(String topic, int queueId)
-	{
+	private void creatStorage(String topic, int queueId) {
 		if (!topicQueueMap.containsKey(topic)) {
 			topicQueueMap.put(topic, new HashMap<Integer, MessageBuffer>());
 		}
@@ -27,10 +26,12 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
-		creatStorage(topic,queueId);
+		creatStorage(topic, queueId);
 		try {
 			return topicQueueMap.get(topic).get(queueId).appendData(data);
 		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		return -1;
@@ -38,7 +39,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public Map<Integer, ByteBuffer> getRange(String topic, int queueId, long offset, int fetchNum) {
-		creatStorage(topic,queueId);
+		creatStorage(topic, queueId);
 		return topicQueueMap.get(topic).get(queueId).getRange(offset, fetchNum);
 	}
 }

@@ -30,13 +30,22 @@ public class MessageBuffer {
 			isReload = true;
 	}
 
-	public long appendData(ByteBuffer data) throws IOException {
+	public long appendData(ByteBuffer data) throws IOException, InterruptedException {
 		if (isReload) {
 			return storage.writeToDisk(data);
 		}
 		storage.writeToDisk(data);
 		data.position(0);
-		return cache.writeToDisk(data);
+		long pos = cache.writeToDisk(data);
+		synchronized (this) {
+			long tBefore = System.currentTimeMillis();
+			wait(Common.syncTime);// wait 1ms
+			if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
+				notifyAll();
+				Runtime.getRuntime().exec("sync -f /essd");
+			}
+		}
+		return pos;
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(long offset, int fetchNum) {
