@@ -36,16 +36,7 @@ public class MessageBuffer {
 		}
 		storage.writeToDisk(data);
 		data.position(0);
-		long pos = cache.writeToDisk(data);
-		synchronized (this) {
-			long tBefore = System.currentTimeMillis();
-			wait(Common.syncTime);// wait 1ms
-			if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
-				notifyAll();
-				//Runtime.getRuntime().exec("sync -f /essd");
-			}
-		}
-		return pos;
+		return cache.writeToDisk(data);
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(long offset, int fetchNum) {

@@ -9,24 +9,6 @@ public abstract class Common {
 	final static int pageSize = 256 * 1024;
 	final static int syncTime = 3;
 
-	public static ByteBuffer cloneByteBuffer(final ByteBuffer original) {
-		// Create clone with same capacity as original.
-		final ByteBuffer clone = (original.isDirect()) ? ByteBuffer.allocateDirect(original.capacity())
-				: ByteBuffer.allocate(original.capacity());
-
-		// Create a read-only copy of the original.
-		// This allows reading from the original without modifying it.
-		final ByteBuffer readOnlyCopy = original.asReadOnlyBuffer();
-
-		// Flip and read from the original.
-		readOnlyCopy.flip();
-		clone.put(readOnlyCopy);
-		clone.position(original.position());
-		clone.limit(original.limit());
-		clone.order(original.order());
-		return clone;
-	}
-
 	private static void deleteDir(File file) {
 		File[] contents = file.listFiles();
 		if (contents == null) {

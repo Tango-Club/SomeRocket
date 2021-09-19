@@ -28,7 +28,16 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	public long append(String topic, int queueId, ByteBuffer data) {
 		creatStorage(topic, queueId);
 		try {
-			return topicQueueMap.get(topic).get(queueId).appendData(data);
+			long result = topicQueueMap.get(topic).get(queueId).appendData(data);
+			synchronized (this) {
+				long tBefore = System.currentTimeMillis();
+				wait(Common.syncTime);// wait 1ms
+				if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
+					notifyAll();
+					Runtime.getRuntime().exec("sync -f /essd");
+				}
+			}
+			return result;
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
