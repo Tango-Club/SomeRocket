@@ -7,7 +7,7 @@ import java.nio.file.Files;
 
 public abstract class Common {
 	final static int pageSize = 256 * 1024;
-	final static int syncTime = 10;
+	final static int syncTime = 3;
 
 	public static ByteBuffer cloneByteBuffer(final ByteBuffer original) {
 		// Create clone with same capacity as original.

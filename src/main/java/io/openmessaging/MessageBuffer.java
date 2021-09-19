@@ -42,7 +42,7 @@ public class MessageBuffer {
 			wait(Common.syncTime);// wait 1ms
 			if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
 				notifyAll();
-				Runtime.getRuntime().exec("sync -f /essd");
+				//Runtime.getRuntime().exec("sync -f /essd");
 			}
 		}
 		return pos;
