@@ -31,7 +31,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			long result = topicQueueMap.get(topic).get(queueId).appendData(data);
 			synchronized (this) {
 				long tBefore = System.currentTimeMillis();
-				wait(Common.syncTime);// wait 1ms
+				wait(Common.syncTime);
 				if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
 					notifyAll();
 					Runtime.getRuntime().exec("sync -f /essd");
