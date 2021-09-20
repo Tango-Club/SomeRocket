@@ -23,11 +23,15 @@ public class MessageBuffer {
 		this.queueId = queueId;
 		Common.initDirectory("/essd");
 		Common.initDirectory("/pmem");
-		storage = new DiskStorage(topic, queueId, "/essd/storage", true);
-		cache = new DiskStorage(topic, queueId, "/pmem/cache", false);
-		isReload = cache.engine.isReload();
+		String storagePath="/essd/storage";
+		String cachePath="/pmem/cache";
 		if (queueId % 3 != 0)
-			isReload = true;
+		{
+			cachePath="/essd/cache";
+		}
+		storage = new DiskStorage(topic, queueId, storagePath, true);
+		cache = new DiskStorage(topic, queueId, cachePath, false);
+		isReload = cache.engine.isReload();
 	}
 
 	public long appendData(ByteBuffer data) throws IOException, InterruptedException {
