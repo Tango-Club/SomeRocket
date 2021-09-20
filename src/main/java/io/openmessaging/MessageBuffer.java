@@ -34,10 +34,6 @@ public class MessageBuffer {
 		}
 	}
 
-	void flush() {
-
-	}
-
 	MessageBuffer(String topic) throws IOException {
 		this.topic = topic;
 		Common.initDirectory("/essd");
