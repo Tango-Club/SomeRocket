@@ -2,6 +2,7 @@ package io.openmessaging;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 
@@ -52,7 +53,12 @@ public abstract class Common {
 		return ByteBuffer.wrap(str.getBytes());
 	}
 
-	public static String getString(ByteBuffer buffer) throws Exception {
-		return new String(buffer.array(), 0, buffer.capacity(), "utf-8");
+	public static String getString(ByteBuffer buffer) {
+		try {
+			return new String(buffer.array(), 0, buffer.capacity(), "utf-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

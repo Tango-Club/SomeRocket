@@ -24,6 +24,15 @@ final public class StoragePage {
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
+	public void flush() {
+		try {
+			dataFileChannel.force(false);
+			offsetFile.getFD().sync();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void open() {
 		try {
 			dataFile = new RandomAccessFile(dataPath, "rw");

@@ -7,14 +7,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class CorrectTest {
-	MessageQueue messageQueue = new DefaultMessageQueueImpl();
-	// MessageQueue messageQueue=new SampleMessageQueueImpl();
 
 	@Test
 	public void main0() {
-		
+
 		Common.cleanPath("/essd/");
 		Common.cleanPath("/pmem/");
+		MessageQueue messageQueue = new DefaultMessageQueueImpl();
 		try {
 			long res = -1;
 
