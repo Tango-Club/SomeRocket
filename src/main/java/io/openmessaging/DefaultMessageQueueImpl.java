@@ -14,7 +14,9 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	StoragePage topicCodeDictPage;
 
-	DefaultMessageQueueImpl() {
+	boolean isInited = false;
+
+	void init() {
 		Common.initDirectory("/essd");
 		Common.initDirectory("/pmem");
 		Common.initDirectory("/essd/cache");
@@ -95,6 +97,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
+		if (!isInited) {
+			isInited = true;
+			init();
+		}
 		Byte topicCode = endodeTopic(topic);
 		try {
 			backup.write(topicCode, (short) queueId, data);
@@ -144,6 +150,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public Map<Integer, ByteBuffer> getRange(String topic, int queueId, long offset, int fetchNum) {
+		if (!isInited) {
+			isInited = true;
+			init();
+		}
 		creatStorage(topic);
 		return topicQueueMap.get(topic).getRange(queueId, offset, fetchNum);
 	}
