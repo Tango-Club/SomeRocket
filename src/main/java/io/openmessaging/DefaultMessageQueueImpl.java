@@ -97,9 +97,11 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
-		if (!isInited) {
-			isInited = true;
-			init();
+		synchronized (this) {
+			if (!isInited) {
+				isInited = true;
+				init();
+			}
 		}
 		Byte topicCode = endodeTopic(topic);
 		try {
@@ -150,9 +152,11 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public Map<Integer, ByteBuffer> getRange(String topic, int queueId, long offset, int fetchNum) {
-		if (!isInited) {
-			isInited = true;
-			init();
+		synchronized (this) {
+			if (!isInited) {
+				isInited = true;
+				init();
+			}
 		}
 		creatStorage(topic);
 		return topicQueueMap.get(topic).getRange(queueId, offset, fetchNum);
