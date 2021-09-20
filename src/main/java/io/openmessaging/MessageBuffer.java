@@ -3,9 +3,12 @@ package io.openmessaging;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
 
 public class MessageBuffer {
+	ConcurrentHashMap<Integer, StorageEngine> queueMap = new ConcurrentHashMap<>();
+
 	DiskStorage storage;
 	DiskStorage cache;
 	String topic;
@@ -13,14 +16,14 @@ public class MessageBuffer {
 	boolean isReload;
 	private static Logger logger = Logger.getLogger(MessageBuffer.class);
 
-	private boolean checkHot() {
-		// TODO: Complete the hot algorithm
-		return false;
+	private void creatStorage(int queueId) {
+		if (!queueMap.containsKey(queueId)) {
+			queueMap.put(queueId, new StorageEngine(topic));
+		}
 	}
-
-	MessageBuffer(String topic, int queueId) throws IOException {
+	
+	MessageBuffer(String topic) throws IOException {
 		this.topic = topic;
-		this.queueId = queueId;
 		Common.initDirectory("/essd");
 		Common.initDirectory("/pmem");
 		String storagePath = "/essd/storage";

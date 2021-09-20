@@ -1,9 +1,7 @@
 package io.openmessaging;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
@@ -23,30 +21,55 @@ public class StorageEngineSynced {
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
-	void updateDataNum() {
-		dataNumPre.set(dataNumPre.size() - 1, getDataNum() + 1);
+	long dataNumber;
+	long lastOffset;
+
+	private long getOffsetByIndex(long x) throws IOException {
+		try {
+			offsetFile.seek(x * 8);
+			return offsetFile.readLong();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return -1;
+		}
 	}
 
-	Long getDataNum() {
-		return dataNumPre.get(dataNumPre.size() - 1);
+	private void appendOffset(long offset) {
+		try {
+			offsetFile.seek(dataNumber * 8);
+			offsetFile.writeLong(offset);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	StoragePage getLastPage() {
-		return pages.get(pages.size() - 1);
+	private int getQidByIndex(long x) {
+		try {
+			qidFile.seek(x * 4);
+			return qidFile.readInt();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return -1;
+		}
 	}
 
-	int getPageDataNum(int pageId) throws IOException {
-		return (int) pages.get(pageId).offsetFile.length() / 4;
+	private void appendQid(int qid) {
+		try {
+			qidFile.seek(dataNumber * 4);
+			qidFile.writeInt(qid);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	StorageEngineSynced(String storagePath, boolean exist) throws IOException {
-		this.dataPath = storagePath + "/0.data";
-		this.offsetPath = storagePath + "/0.offset";
-		this.qidPath = storagePath + "/0.qid";
+		dataPath = storagePath + "/0.data";
+		offsetPath = storagePath + "/0.offset";
+		qidPath = storagePath + "/0.qid";
 
-		Common.initPath(this.dataPath);
-		Common.initPath(this.offsetPath);
-		Common.initPath(this.qidPath);
+		Common.initPath(dataPath);
+		Common.initPath(offsetPath);
+		Common.initPath(qidPath);
 
 		try {
 			dataFile = new RandomAccessFile(dataPath, "rw");
@@ -59,61 +82,55 @@ public class StorageEngineSynced {
 		}
 
 		if (exist) {
-
+			dataNumber = offsetFile.length() / 4 - 1;
+			lastOffset = getOffsetByIndex(dataNumber - 1);
+		} else {
+			dataNumber = 0;
+			lastOffset = 0;
+			appendOffset(0);
 		}
 	}
 
-	public long write(ByteBuffer buffer) throws IOException {
-		if (pages.size() == 0 || getLastPage().lastOffset + buffer.capacity() > Common.pageSize) {
-			if (pages.size() != 0) {
-				getLastPage().close();
-			}
-			String pagePath = storagePath + "/" + Integer.toString(pages.size());
-			pages.add(new StoragePage(pagePath, false));
-			dataNumPre.add(getDataNum());
-		}
-		getLastPage().write(buffer);
-		updateDataNum();
-		return getDataNum() - 1;
+	public void write(int queueId, ByteBuffer buffer) throws IOException {
+		dataFileChannel.position(lastOffset);
+		lastOffset += buffer.capacity();
+
+		dataNumber++;
+		dataFileChannel.write(buffer);
+		appendOffset(lastOffset);
+		appendQid(queueId);
 	}
 
-	public HashMap<Integer, ByteBuffer> getRange(long index, int fetchNum) {
-		fetchNum = (int) Math.min((long) fetchNum, getDataNum() - index);
+	public ByteBuffer readNoSeek(int length) throws IOException {
+		ByteBuffer buffer = ByteBuffer.allocate(length);
+		dataFileChannel.read(buffer);
+		buffer.flip();
+		return buffer;
+	}
+
+	public ByteBuffer getDataByIndex(long index) {
+		try {
+			long offset = getOffsetByIndex(index);
+			dataFileChannel.position(offset);
+			int length = (int) (getOffsetByIndex(index + 1) - offset);
+			return readNoSeek(length);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public HashMap<Integer, ByteBuffer> getRange(int queueId, long index, long fetchNum) {
 		HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
-		if (fetchNum <= 0)
-			return result;
-
-		int left = 1, right = pages.size();
-		while (left < right) {
-			int mid = (left + right) / 2;
-			if (dataNumPre.get(mid) <= index) {
-				left = mid + 1;
-			} else {
-				right = mid;
+		int idx = 0;
+		for (long i = 0; i < dataNumber && idx < fetchNum; i++) {
+			if (getQidByIndex(i) != queueId)
+				continue;
+			if (index > 0) {
+				index--;
+				continue;
 			}
-		}
-
-		int pageId = left - 1;
-		int pageIndex = (int) (index - dataNumPre.get(pageId));
-		int readed = 0;
-		while (fetchNum > 0) {
-			int pageFetchNum = Math.min(fetchNum, pages.get(pageId).dataNumber - pageIndex);
-			if (pageFetchNum == 0)
-				break;
-
-			if (pageId != pages.size() - 1)
-				pages.get(pageId).open();
-			result.putAll(pages.get(pageId).getRange(pageIndex, pageFetchNum, readed));
-			pageIndex += pageFetchNum;
-			if (pageId != pages.size() - 1)
-				pages.get(pageId).close();
-
-			if (pageIndex == pages.get(pageId).dataNumber) {
-				pageIndex = 0;
-				pageId++;
-			}
-			fetchNum -= pageFetchNum;
-			readed += pageFetchNum;
+			result.put(idx++, getDataByIndex(i));
 		}
 		return result;
 	}

@@ -1,6 +1,5 @@
 package io.openmessaging;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.*;
@@ -9,19 +8,11 @@ import org.apache.log4j.Logger;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
-	ConcurrentHashMap<String, HashMap<Integer, MessageBuffer>> topicQueueMap = new ConcurrentHashMap<>();
-	ConcurrentHashMap<String, Map<Integer, Map<Long, ByteBuffer>>> appendData = new ConcurrentHashMap<>();
+	ConcurrentHashMap<String, MessageBuffer> topicQueueMap = new ConcurrentHashMap<>();
 
 	private void creatStorage(String topic, int queueId) {
 		if (!topicQueueMap.containsKey(topic)) {
-			topicQueueMap.put(topic, new HashMap<Integer, MessageBuffer>());
-		}
-		if (!topicQueueMap.get(topic).containsKey(queueId)) {
-			try {
-				topicQueueMap.get(topic).put(queueId, new MessageBuffer(topic, queueId));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			topicQueueMap.put(topic, new MessageBuffer(topic));
 		}
 	}
 
