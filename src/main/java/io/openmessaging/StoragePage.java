@@ -44,13 +44,6 @@ final public class StoragePage {
 		}
 	}
 
-	public void flush() throws IOException {
-		Runtime.getRuntime().exec("sync -d " + dataPath);
-		Runtime.getRuntime().exec("sync -d " + offsetPath);
-		// dataFileChannel.force(false);
-		// offsetFile.getFD().sync();
-	}
-
 	private int getOffsetByIndex(int x) throws IOException {
 		offsetFile.seek(x * 4);
 		return offsetFile.readInt();
@@ -78,7 +71,6 @@ final public class StoragePage {
 		if (exist) {
 			this.dataNumber = (int) offsetFile.length() / 4 - 1;
 			this.lastOffset = getOffsetByIndex(dataNumber - 1);
-			logger.info("reload: " + dataPath + ", " + offsetPath + ", dataNumber: " + dataNumber);
 		} else {
 			this.dataNumber = 0;
 			this.lastOffset = 0;

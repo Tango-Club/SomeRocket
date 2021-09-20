@@ -5,22 +5,23 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.io.FileNotFoundException;
 import org.apache.log4j.Logger;
 
-public class StorageEngine {
-	String storagePath;
+public class StorageEngineSynced {
+	String dataPath;
+	String offsetPath;
+	String qidPath;
 
-	boolean isReload = false;
+	RandomAccessFile dataFile;
+	RandomAccessFile offsetFile;
+	RandomAccessFile qidFile;
 
-	ArrayList<Long> dataNumPre = new ArrayList<Long>();
-	ArrayList<StoragePage> pages = new ArrayList<StoragePage>();
+	FileChannel dataFileChannel;
 
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
-
-	public boolean isReload() {
-		return isReload;
-	}
 
 	void updateDataNum() {
 		dataNumPre.set(dataNumPre.size() - 1, getDataNum() + 1);
@@ -38,22 +39,27 @@ public class StorageEngine {
 		return (int) pages.get(pageId).offsetFile.length() / 4;
 	}
 
-	StorageEngine(String storagePath, boolean exist) throws IOException {
-		this.storagePath = storagePath;
+	StorageEngineSynced(String storagePath, boolean exist) throws IOException {
+		this.dataPath = storagePath + "/0.data";
+		this.offsetPath = storagePath + "/0.offset";
+		this.qidPath = storagePath + "/0.qid";
 
-		dataNumPre.add(0L);
+		Common.initPath(this.dataPath);
+		Common.initPath(this.offsetPath);
+		Common.initPath(this.qidPath);
+
+		try {
+			dataFile = new RandomAccessFile(dataPath, "rw");
+			offsetFile = new RandomAccessFile(offsetPath, "rw");
+			qidFile = new RandomAccessFile(qidPath, "rw");
+
+			dataFileChannel = dataFile.getChannel();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
 		if (exist) {
-			isReload = true;
-			for (int pageId = 0; true; pageId++) {
-				String pagePath = storagePath + "/" + Integer.toString(pageId);
-				if (!new File(pagePath + ".data").exists())
-					break;
-				pages.add(new StoragePage(pagePath, true));
-				dataNumPre.add(getDataNum() + getLastPage().dataNumber);
-			}
-			for (int pageId = 0; pageId < pages.size() - 1; pageId++) {
-				pages.get(pageId).close();
-			}
+
 		}
 	}
 

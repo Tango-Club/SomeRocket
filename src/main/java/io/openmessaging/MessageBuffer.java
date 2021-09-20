@@ -23,14 +23,13 @@ public class MessageBuffer {
 		this.queueId = queueId;
 		Common.initDirectory("/essd");
 		Common.initDirectory("/pmem");
-		String storagePath="/essd/storage";
-		String cachePath="/pmem/cache";
-		if (queueId % 3 != 0)
-		{
-			cachePath="/essd/cache";
+		String storagePath = "/essd/storage";
+		String cachePath = "/pmem/cache";
+		if (queueId % 3 != 0) {
+			cachePath = "/essd/cache";
 		}
-		storage = new DiskStorage(topic, queueId, storagePath, true);
-		cache = new DiskStorage(topic, queueId, cachePath, false);
+		storage = new DiskStorage(topic, queueId, storagePath);
+		cache = new DiskStorage(topic, queueId, cachePath);
 		isReload = cache.engine.isReload();
 	}
 

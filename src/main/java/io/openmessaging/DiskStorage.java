@@ -7,13 +7,13 @@ import java.util.HashMap;
 public class DiskStorage {
 	StorageEngine engine;
 
-	DiskStorage(String topic, int queueId, String basePath, boolean isStorage) throws IOException {
+	DiskStorage(String topic, int queueId, String basePath) throws IOException {
 		Common.initDirectory(basePath);
 		String storagePath = basePath + "/ds_" + topic + "_" + Integer.toString(queueId);
 
 		boolean exist = !Common.initDirectory(storagePath);
 
-		engine = new StorageEngine(storagePath, exist, isStorage);
+		engine = new StorageEngine(storagePath, exist);
 	}
 
 	long writeToDisk(ByteBuffer data) throws IOException {
