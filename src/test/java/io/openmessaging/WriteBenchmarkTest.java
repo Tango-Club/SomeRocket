@@ -21,7 +21,7 @@ public class WriteBenchmarkTest {
 		int queueId = 123;
 
 		try {
-			int x = 10000;
+			int x = 1000;
 			for (int i = 0; i < x; i++)
 				messageQueue.append(topic, queueId, Common.getByteBuffer(text));
 

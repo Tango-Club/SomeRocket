@@ -1,5 +1,6 @@
 package io.openmessaging;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -7,48 +8,82 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
 
 public class MessageBuffer {
-	ConcurrentHashMap<Integer, StorageEngine> queueMap = new ConcurrentHashMap<>();
+	ConcurrentHashMap<Integer, DiskStorage> cacheMap = new ConcurrentHashMap<>();
 
-	DiskStorage storage;
-	DiskStorage cache;
+	StorageEngineSynced storage;
 	String topic;
-	int queueId;
+	String storagePath;
+	String cachePath;
+
 	boolean isReload;
 	private static Logger logger = Logger.getLogger(MessageBuffer.class);
 
 	private void creatStorage(int queueId) {
-		if (!queueMap.containsKey(queueId)) {
-			queueMap.put(queueId, new StorageEngine(topic));
+		if (!cacheMap.containsKey(queueId)) {
+			try {
+				String cachePath;
+				if (queueId % 3 != 0)
+					cachePath = "/essd/cache";
+				else
+					cachePath = "/pmem/cache";
+
+				cacheMap.put(queueId, new DiskStorage(topic, queueId, cachePath));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
-	
+
+	void flush() {
+
+	}
+
 	MessageBuffer(String topic) throws IOException {
 		this.topic = topic;
 		Common.initDirectory("/essd");
+		Common.initDirectory("/essd/storage");
 		Common.initDirectory("/pmem");
-		String storagePath = "/essd/storage";
-		String cachePath = "/pmem/cache";
-		if (queueId % 3 != 0) {
-			cachePath = "/essd/cache";
-		}
-		storage = new DiskStorage(topic, queueId, storagePath);
-		cache = new DiskStorage(topic, queueId, cachePath);
-		isReload = cache.engine.isReload();
+		storagePath = "/essd/storage/sync_" + topic;
+		isReload = !Common.initDirectory(storagePath);
+		storage = new StorageEngineSynced(storagePath, isReload);
+		if (isReload)
+			recover();
 	}
 
-	public long appendData(ByteBuffer data) throws IOException, InterruptedException {
-		if (isReload) {
-			return storage.writeToDisk(data);
+	private void recover() {
+		Common.cleanPath("/essd/cache");
+		Common.cleanPath("/pmem/cache");
+
+		for (long i = 0; i < storage.dataNumber; i++) {
+			int queueId = storage.getQidByIndex(i + 1);
+			ByteBuffer buffer = storage.getDataByIndex(i);
+			try {
+				creatStorage(queueId);
+				cacheMap.get(queueId).writeToDisk(buffer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-		storage.writeToDisk(data);
+	}
+
+	public long appendData(int queueId, ByteBuffer data) throws IOException, InterruptedException {
+		storage.write(queueId, data);
+		storage.flush();
+		synchronized (this) {
+			long tBefore = System.currentTimeMillis();
+			wait(Common.syncTime);
+			if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
+				storage.flush();
+				notifyAll();
+			}
+		}
 		data.position(0);
-		return cache.writeToDisk(data);
+		creatStorage(queueId);
+		return cacheMap.get(queueId).writeToDisk(data);
 	}
 
-	public HashMap<Integer, ByteBuffer> getRange(long offset, int fetchNum) {
-		if (isReload) {
-			return storage.readFromDisk(offset, fetchNum);
-		}
-		return cache.readFromDisk(offset, fetchNum);
+	public HashMap<Integer, ByteBuffer> getRange(int queueId, long offset, int fetchNum) {
+		creatStorage(queueId);
+		return cacheMap.get(queueId).readFromDisk(offset, fetchNum);
 	}
 }

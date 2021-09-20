@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.io.RandomAccessFile;
+import java.io.SyncFailedException;
 import java.nio.channels.FileChannel;
 import java.io.FileNotFoundException;
 import org.apache.log4j.Logger;
@@ -43,7 +44,7 @@ public class StorageEngineSynced {
 		}
 	}
 
-	private int getQidByIndex(long x) {
+	public int getQidByIndex(long x) {
 		try {
 			qidFile.seek(x * 4);
 			return qidFile.readInt();
@@ -57,6 +58,18 @@ public class StorageEngineSynced {
 		try {
 			qidFile.seek(dataNumber * 4);
 			qidFile.writeInt(qid);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void flush() {
+		try {
+			dataFileChannel.force(false);
+			offsetFile.getFD().sync();
+			qidFile.getFD().sync();
+		} catch (SyncFailedException e) {
+			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -82,7 +95,7 @@ public class StorageEngineSynced {
 		}
 
 		if (exist) {
-			dataNumber = offsetFile.length() / 4 - 1;
+			dataNumber = offsetFile.length() / 8 - 1;
 			lastOffset = getOffsetByIndex(dataNumber - 1);
 		} else {
 			dataNumber = 0;

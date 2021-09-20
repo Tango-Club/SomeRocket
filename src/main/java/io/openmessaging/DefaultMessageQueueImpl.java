@@ -10,26 +10,21 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	private static Logger logger = Logger.getLogger(StorageEngine.class);
 	ConcurrentHashMap<String, MessageBuffer> topicQueueMap = new ConcurrentHashMap<>();
 
-	private void creatStorage(String topic, int queueId) {
+	private void creatStorage(String topic) {
 		if (!topicQueueMap.containsKey(topic)) {
-			topicQueueMap.put(topic, new MessageBuffer(topic));
+			try {
+				topicQueueMap.put(topic, new MessageBuffer(topic));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
-		creatStorage(topic, queueId);
+		creatStorage(topic);
 		try {
-			long result = topicQueueMap.get(topic).get(queueId).appendData(data);
-			synchronized (this) {
-				long tBefore = System.currentTimeMillis();
-				wait(Common.syncTime);
-				if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
-					new ProcessBuilder("sync", "-d", "/essd").inheritIO().start();
-					notifyAll();
-				}
-			}
-			return result;
+			return topicQueueMap.get(topic).appendData(queueId, data);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -40,7 +35,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public Map<Integer, ByteBuffer> getRange(String topic, int queueId, long offset, int fetchNum) {
-		creatStorage(topic, queueId);
-		return topicQueueMap.get(topic).get(queueId).getRange(offset, fetchNum);
+		creatStorage(topic);
+		return topicQueueMap.get(topic).getRange(queueId, offset, fetchNum);
 	}
 }
