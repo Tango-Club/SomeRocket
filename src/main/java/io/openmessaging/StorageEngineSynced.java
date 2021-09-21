@@ -50,7 +50,6 @@ public class StorageEngineSynced {
 		dataPath = storagePath + "/sync.data";
 		metaPath = storagePath + "/sync.meta";
 
-
 		Common.initPath(dataPath);
 		Common.initPath(metaPath);
 

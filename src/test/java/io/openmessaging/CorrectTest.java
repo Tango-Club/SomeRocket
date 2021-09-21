@@ -10,14 +10,9 @@ public class CorrectTest {
 
 	@Test
 	public void main0() {
-		String runDir="";
-		try{
-			runDir=System.getenv("runDir");
-		}catch (Exception e){
-			e.printStackTrace();
-		}
-		Common.cleanPath(runDir+"/essd/");
-		Common.cleanPath(runDir+"/pmem/");
+		Common.cleanPath(Common.runDir + "/essd/");
+		Common.cleanPath(Common.runDir + "/pmem/");
+
 		MessageQueue messageQueue = new DefaultMessageQueueImpl();
 		try {
 			long res = -1;

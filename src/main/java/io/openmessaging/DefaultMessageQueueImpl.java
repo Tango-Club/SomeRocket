@@ -18,18 +18,19 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	long lastFlush = -1;
 
 	void init() {
-		String runDir="";
-		try{
-			runDir=System.getenv("runDir");
-		}catch (Exception e){
+		try {
+			Common.runDir = System.getenv("runDir");
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Common.initDirectory(runDir+"/essd");
-		Common.initDirectory(runDir+"/pmem");
-		Common.initDirectory(runDir+"/essd/cache");
-		Common.initDirectory(runDir+"/pmem/cache");
+		if (Common.runDir == null)
+			Common.runDir = "";
+		Common.initDirectory(Common.runDir + "/essd");
+		Common.initDirectory(Common.runDir + "/pmem");
+		Common.initDirectory(Common.runDir + "/essd/cache");
+		Common.initDirectory(Common.runDir + "/pmem/cache");
 
-		String storagePath = runDir+"/essd/sync";
+		String storagePath = Common.runDir + "/essd/sync";
 
 		boolean isReload = !Common.initDirectory(storagePath);
 		try {
@@ -55,14 +56,8 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	}
 
 	private void recover() throws IOException {
-		String runDir="";
-		try{
-			runDir=System.getenv("runDir");
-		}catch (Exception e){
-			e.printStackTrace();
-		}
-		Common.cleanPath(runDir+"/essd/cache");
-		Common.cleanPath(runDir+"/pmem/cache");
+		Common.cleanPath(Common.runDir + "/essd/cache");
+		Common.cleanPath(Common.runDir + "/pmem/cache");
 
 		ConcurrentHashMap<Byte, String> reverseMap = new ConcurrentHashMap<>();
 		for (byte i = 0; i < topicCodeDictPage.dataNumber; i++) {
