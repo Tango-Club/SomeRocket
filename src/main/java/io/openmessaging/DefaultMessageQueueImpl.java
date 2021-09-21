@@ -56,9 +56,6 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 
 
-
-
-
 	void init() {
 
 		String runDir="";
