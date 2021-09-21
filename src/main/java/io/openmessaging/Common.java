@@ -11,8 +11,8 @@ import java.io.InputStreamReader;
 import java.lang.Process;
 
 public abstract class Common {
-	final static int pageSize = 32 * 1024;
-	final static int syncTime = 500000;
+	final static int pageSize = 20 * 1024;
+	final static int syncTime = 900000;
 
 	static String runDir;
 

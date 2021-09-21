@@ -135,7 +135,12 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
+		if (backup.dataNumber % 1000000 == 0)
+			try {
+				logger.info("dataNum: " + backup.dataNumber + " fileSize: " + backup.dataFile.length());
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 		data.position(0);
 		creatStorage(topic);
 		try {
