@@ -10,6 +10,8 @@ public abstract class Common {
 	final static int pageSize = 256 * 1024 * 1024;
 	final static int syncTime = 100000;
 
+	static String runDir;
+
 	private static void deleteDir(File file) {
 		File[] contents = file.listFiles();
 		if (contents == null) {
