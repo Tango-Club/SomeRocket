@@ -15,6 +15,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	StoragePage topicCodeDictPage;
 
 	boolean isInited = false;
+	long lastFlush = -1;
 
 	void init() {
 		String runDir="";
@@ -122,13 +123,17 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
 		try {
 			synchronized (this) {
-				long tBefore = System.nanoTime();
+				long nowNum = backup.dataNumber;
 				wait(0, Common.syncTime);
-				if (System.nanoTime() - tBefore >= Common.syncTime) {
-					backup.flush();
-					notifyAll();
+				synchronized (this) {
+					if (lastFlush < backup.dataNumber) {
+						backup.flush();
+						lastFlush = backup.dataNumber;
+						notifyAll();
+					}
 				}
 			}
 		} catch (InterruptedException e) {
