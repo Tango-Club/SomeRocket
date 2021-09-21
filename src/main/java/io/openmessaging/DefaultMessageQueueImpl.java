@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.Semaphore;
+
 import org.apache.log4j.Logger;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
@@ -14,24 +17,62 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	StoragePage topicCodeDictPage;
 
+
+	LinkedBlockingDeque<ArrayList<Object> > writeQueue = new LinkedBlockingDeque<ArrayList<Object> >();
+
+
+
 	boolean isInited = false;
-	long lastFlush = -1;
+
+
+	Thread writeThread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			Timer a = new Timer(true);
+			a.schedule(new java.util.TimerTask() { public void run() { backup.flush();} }, 0, Common.syncTime);
+			while (true) {
+				try {
+					ArrayList<Object> databox = writeQueue.poll();
+					String topic=(String) databox.get(0);
+					int queueId=(Integer) databox.get(1);
+					ByteBuffer data = (ByteBuffer) databox.get(2);
+					if (!isInited) {
+						init();
+						isInited = true;
+					}
+					Byte topicCode = endodeTopic(topic);
+					try {
+						backup.write(topicCode, (short) queueId, data);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					((Semaphore)databox.get(3)).release();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	});
+
+
+
+
+
 
 	void init() {
-		try {
-			Common.runDir = System.getenv("runDir");
-		} catch (Exception e) {
+
+		String runDir="";
+		try{
+			runDir=System.getenv("runDir");
+		}catch (Exception e){
 			e.printStackTrace();
 		}
-		if (Common.runDir == null)
-			Common.runDir = "";
-		Common.initDirectory(Common.runDir + "/essd");
-		Common.initDirectory(Common.runDir + "/pmem");
-		Common.initDirectory(Common.runDir + "/essd/cache");
-		Common.initDirectory(Common.runDir + "/pmem/cache");
+		Common.initDirectory(runDir+"/essd");
+		Common.initDirectory(runDir+"/pmem");
+		Common.initDirectory(runDir+"/essd/cache");
+		Common.initDirectory(runDir+"/pmem/cache");
 
-		String storagePath = Common.runDir + "/essd/sync";
-
+		String storagePath = runDir+"/essd/sync";
 		boolean isReload = !Common.initDirectory(storagePath);
 		try {
 			backup = new StorageEngineSynced(storagePath, isReload);
@@ -53,11 +94,19 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 				e.printStackTrace();
 			}
 		}
+
+
 	}
 
 	private void recover() throws IOException {
-		Common.cleanPath(Common.runDir + "/essd/cache");
-		Common.cleanPath(Common.runDir + "/pmem/cache");
+		String runDir="";
+		try{
+			runDir=System.getenv("runDir");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		Common.cleanPath(runDir+"/essd/cache");
+		Common.cleanPath(runDir+"/pmem/cache");
 
 		ConcurrentHashMap<Byte, String> reverseMap = new ConcurrentHashMap<>();
 		for (byte i = 0; i < topicCodeDictPage.dataNumber; i++) {
@@ -106,34 +155,43 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
-		synchronized (this) {
-			if (!isInited) {
-				init();
-				isInited = true;
-			}
-		}
-		Byte topicCode = endodeTopic(topic);
 		try {
-			backup.write(topicCode, (short) queueId, data);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+			ArrayList<Object> databox = new ArrayList<Object>();
+			databox.add(topic);
+			databox.add(queueId);
+			databox.add(data);
+			Semaphore semaphore = new Semaphore(0);
+			databox.add(semaphore);
+			writeQueue.add(databox);
+			semaphore.acquire();
 
-		try {
-			synchronized (this) {
-				long nowNum = backup.dataNumber;
-				wait(0, Common.syncTime);
-				synchronized (this) {
-					if (lastFlush < backup.dataNumber) {
-						backup.flush();
-						lastFlush = backup.dataNumber;
-						notifyAll();
-					}
-				}
-			}
-		} catch (InterruptedException e) {
+		}catch (Exception e){
 			e.printStackTrace();
 		}
+//		synchronized (this) {
+//			if (!isInited) {
+//				init();
+//				isInited = true;
+//			}
+//		}
+//		Byte topicCode = endodeTopic(topic);
+//		try {
+//			backup.write(topicCode, (short) queueId, data);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		try {
+//			synchronized (this) {
+//				long tBefore = System.nanoTime();
+//				wait(0, Common.syncTime);
+//				if (System.nanoTime() - tBefore >= Common.syncTime) {
+//					backup.flush();
+//					notifyAll();
+//				}
+//			}
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 
 		data.position(0);
 		creatStorage(topic);
