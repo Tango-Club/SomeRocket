@@ -113,9 +113,9 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 		try {
 			synchronized (this) {
-				long tBefore = System.currentTimeMillis();
-				wait(Common.syncTime);
-				if (System.currentTimeMillis() - tBefore >= Common.syncTime) {
+				long tBefore = System.nanoTime();
+				wait(0, Common.syncTime);
+				if (System.nanoTime() - tBefore >= Common.syncTime) {
 					backup.flush();
 					notifyAll();
 				}
