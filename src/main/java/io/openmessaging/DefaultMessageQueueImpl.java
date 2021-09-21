@@ -123,7 +123,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
+		
 		data.position(0);
 		creatStorage(topic);
 		try {
