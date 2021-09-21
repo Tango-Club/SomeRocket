@@ -60,19 +60,20 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 
 	void init() {
-
-		String runDir="";
-		try{
-			runDir=System.getenv("runDir");
-		}catch (Exception e){
+		try {
+			Common.runDir = System.getenv("runDir");
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		Common.initDirectory(runDir+"/essd");
-		Common.initDirectory(runDir+"/pmem");
-		Common.initDirectory(runDir+"/essd/cache");
-		Common.initDirectory(runDir+"/pmem/cache");
+		if (Common.runDir == null)
+			Common.runDir = "";
+		Common.initDirectory(Common.runDir + "/essd");
+		Common.initDirectory(Common.runDir + "/pmem");
+		Common.initDirectory(Common.runDir + "/essd/cache");
+		Common.initDirectory(Common.runDir + "/pmem/cache");
 
-		String storagePath = runDir+"/essd/sync";
+		String storagePath = Common.runDir + "/essd/sync";
+
 		boolean isReload = !Common.initDirectory(storagePath);
 		try {
 			backup = new StorageEngineSynced(storagePath, isReload);
