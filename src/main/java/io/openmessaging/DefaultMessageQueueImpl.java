@@ -17,12 +17,19 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	boolean isInited = false;
 
 	void init() {
-		Common.initDirectory("/essd");
-		Common.initDirectory("/pmem");
-		Common.initDirectory("/essd/cache");
-		Common.initDirectory("/pmem/cache");
+		String runDir="";
+		try{
+			runDir=System.getenv("runDir");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		Common.initDirectory(runDir+"/essd");
+		Common.initDirectory(runDir+"/pmem");
+		Common.initDirectory(runDir+"/essd/cache");
+		Common.initDirectory(runDir+"/pmem/cache");
 
-		String storagePath = "/essd/sync";
+		String storagePath = runDir+"/essd/sync";
+
 		boolean isReload = !Common.initDirectory(storagePath);
 		try {
 			backup = new StorageEngineSynced(storagePath, isReload);
@@ -47,8 +54,14 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	}
 
 	private void recover() throws IOException {
-		Common.cleanPath("/essd/cache");
-		Common.cleanPath("/pmem/cache");
+		String runDir="";
+		try{
+			runDir=System.getenv("runDir");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		Common.cleanPath(runDir+"/essd/cache");
+		Common.cleanPath(runDir+"/pmem/cache");
 
 		ConcurrentHashMap<Byte, String> reverseMap = new ConcurrentHashMap<>();
 		for (byte i = 0; i < topicCodeDictPage.dataNumber; i++) {

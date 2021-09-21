@@ -16,11 +16,17 @@ public class MessageBuffer {
 	private synchronized void creatStorage(int queueId) {
 		if (!cacheMap.containsKey(queueId)) {
 			try {
+				String runDir="";
+				try{
+					runDir=System.getenv("runDir");
+				}catch (Exception e){
+					e.printStackTrace();
+				}
 				String cachePath;
 				if (queueId % 3 != 0)
-					cachePath = "/essd/cache";
+					cachePath = runDir+"/essd/cache";
 				else
-					cachePath = "/pmem/cache";
+					cachePath = runDir+"/pmem/cache";
 
 				cacheMap.put(queueId, new DiskStorage(topic, queueId, cachePath));
 			} catch (IOException e) {

@@ -12,9 +12,14 @@ public class WriteBenchmarkTest {
 
 	@Test
 	public void main0() {
-
-		Common.cleanPath("/essd/");
-		Common.cleanPath("/pmem/");
+		String runDir="";
+		try{
+			runDir=System.getenv("runDir");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+		Common.cleanPath(runDir+"/essd/");
+		Common.cleanPath(runDir+"/pmem/");
 
 		MessageQueue messageQueue = new DefaultMessageQueueImpl();
 
