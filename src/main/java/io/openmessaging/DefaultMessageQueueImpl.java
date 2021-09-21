@@ -7,7 +7,8 @@ import java.util.*;
 import org.apache.log4j.Logger;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
-	private static Logger logger = Logger.getLogger(StorageEngine.class);
+	private static Logger logger = Logger.getLogger(DefaultMessageQueueImpl.class);
+
 	ConcurrentHashMap<String, MessageBuffer> topicQueueMap = new ConcurrentHashMap<>();
 	StorageEngineSynced backup;
 	ConcurrentHashMap<String, Byte> topicCodeMap = new ConcurrentHashMap<>();
@@ -19,10 +20,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	void init() {
 		try {
-			Common.runDir = System.getenv("runDir");
+			logger.info(Common.readCpuCache());
 		} catch (Exception e) {
-			e.printStackTrace();
 		}
+
 		if (Common.runDir == null)
 			Common.runDir = "";
 		Common.initDirectory(Common.runDir + "/essd");

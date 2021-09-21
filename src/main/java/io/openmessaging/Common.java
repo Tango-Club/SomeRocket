@@ -5,12 +5,33 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.io.InputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.lang.Process;
 
 public abstract class Common {
-	final static int pageSize = 256 * 1024 * 1024;
-	final static int syncTime = 100000;
+	final static int pageSize = 32 * 1024;
+	final static int syncTime = 500000;
 
 	static String runDir;
+
+	public static final String readCpuCache() throws IOException {
+		final ProcessBuilder pb = new ProcessBuilder("sh", "-c", "getconf -a |grep CACHE");
+		pb.redirectErrorStream(true);
+
+		final Process process = pb.start();
+		final InputStream in = process.getInputStream();
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+		String result = "";
+		String line;
+		while ((line = bufferedReader.readLine()) != null) {
+			result += line;
+			result += "\n";
+		}
+		return result;
+
+	}
 
 	private static void deleteDir(File file) {
 		File[] contents = file.listFiles();
