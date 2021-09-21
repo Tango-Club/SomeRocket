@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.Semaphore;
-
 import org.apache.log4j.Logger;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
@@ -17,47 +14,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	StoragePage topicCodeDictPage;
 
-
-	LinkedBlockingDeque<ArrayList<Object> > writeQueue = new LinkedBlockingDeque<ArrayList<Object> >();
-
-
-
 	boolean isInited = false;
-
-
-	Thread writeThread = new Thread(new Runnable() {
-		@Override
-		public void run() {
-			Timer a = new Timer(true);
-			a.schedule(new java.util.TimerTask() { public void run() { backup.flush();} }, 0, Common.syncTime);
-			while (true) {
-				try {
-					ArrayList<Object> databox = writeQueue.poll();
-					String topic=(String) databox.get(0);
-					int queueId=(Integer) databox.get(1);
-					ByteBuffer data = (ByteBuffer) databox.get(2);
-					if (!isInited) {
-						init();
-						isInited = true;
-					}
-					Byte topicCode = endodeTopic(topic);
-					try {
-						backup.write(topicCode, (short) queueId, data);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					((Semaphore)databox.get(3)).release();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-	});
-
-
+	long lastFlush = -1;
 
 	void init() {
-
 		String runDir="";
 		try{
 			runDir=System.getenv("runDir");
@@ -70,6 +30,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		Common.initDirectory(runDir+"/pmem/cache");
 
 		String storagePath = runDir+"/essd/sync";
+
 		boolean isReload = !Common.initDirectory(storagePath);
 		try {
 			backup = new StorageEngineSynced(storagePath, isReload);
@@ -91,8 +52,6 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 				e.printStackTrace();
 			}
 		}
-
-
 	}
 
 	private void recover() throws IOException {
@@ -152,43 +111,34 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
+		synchronized (this) {
+			if (!isInited) {
+				init();
+				isInited = true;
+			}
+		}
+		Byte topicCode = endodeTopic(topic);
 		try {
-			ArrayList<Object> databox = new ArrayList<Object>();
-			databox.add(topic);
-			databox.add(queueId);
-			databox.add(data);
-			Semaphore semaphore = new Semaphore(0);
-			databox.add(semaphore);
-			writeQueue.add(databox);
-			semaphore.acquire();
-
-		}catch (Exception e){
+			backup.write(topicCode, (short) queueId, data);
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
-//		synchronized (this) {
-//			if (!isInited) {
-//				init();
-//				isInited = true;
-//			}
-//		}
-//		Byte topicCode = endodeTopic(topic);
-//		try {
-//			backup.write(topicCode, (short) queueId, data);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		try {
-//			synchronized (this) {
-//				long tBefore = System.nanoTime();
-//				wait(0, Common.syncTime);
-//				if (System.nanoTime() - tBefore >= Common.syncTime) {
-//					backup.flush();
-//					notifyAll();
-//				}
-//			}
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+
+		try {
+			synchronized (this) {
+				long nowNum = backup.dataNumber;
+				wait(0, Common.syncTime);
+				synchronized (this) {
+					if (lastFlush < backup.dataNumber) {
+						backup.flush();
+						lastFlush = backup.dataNumber;
+						notifyAll();
+					}
+				}
+			}
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
 		data.position(0);
 		creatStorage(topic);
