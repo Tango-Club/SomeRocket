@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
+import java.util.Date;
 import org.apache.log4j.Logger;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
@@ -19,10 +20,9 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	long lastFlush = -1;
 
 	void init() {
-		try {
-			logger.info(Common.readCpuCache());
-		} catch (Exception e) {
-		}
+		/*
+		 * try { logger.info(Common.readCpuCache()); } catch (Exception e) { }
+		 */
 
 		if (Common.runDir == null)
 			Common.runDir = "";
@@ -66,7 +66,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			String topic;
 			try {
 				topic = Common.getString(topicCodeDictPage.getDataByIndex(i));
-				creatStorage(topic);
+				tryCreatStorage(topic);
 				reverseMap.put((Byte) i, topic);
 				topicCodeMap.put(topic, (Byte) i);
 			} catch (IOException e) {
@@ -95,32 +95,54 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 	}
 
-	private synchronized void creatStorage(String topic) {
-		if (!topicQueueMap.containsKey(topic)) {
-			try {
-				topicQueueMap.put(topic, new MessageBuffer(topic));
-			} catch (IOException e) {
-				e.printStackTrace();
+	private void ready(String topic) {
+		tryInit();
+		tryCreatStorage(topic);
+	}
+
+	private void tryInit() {
+		if (!isInited) {
+			synchronized (this) {
+				if (!isInited) {
+					init();
+					isInited = true;
+				}
+			}
+		}
+	}
+
+	private void tryCreatStorage(String topic) {
+		if (topicQueueMap.containsKey(topic))
+			return;
+		synchronized (this) {
+			if (!topicQueueMap.containsKey(topic)) {
+				try {
+					topicQueueMap.put(topic, new MessageBuffer(topic));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
-		synchronized (this) {
-			if (!isInited) {
-				init();
-				isInited = true;
-			}
-		}
+		ready(topic);
 		Byte topicCode = endodeTopic(topic);
 		try {
 			backup.write(topicCode, (short) queueId, data);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		sleep(Common.syncTimeMs);
+		data.position(0);
+		long result = -1;
+		try {
+			result = topicQueueMap.get(topic).appendData(queueId, data);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		synchronized (this) {
 			if (lastFlush < backup.dataNumber) {
 				backup.flush();
@@ -133,43 +155,33 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-		data.position(0);
-		creatStorage(topic);
-		try {
-			return topicQueueMap.get(topic).appendData(queueId, data);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		return -1;
+
+		return result;
 	}
 
 	private Byte endodeTopic(String topic) {
 		if (topicCodeMap.containsKey(topic)) {
 			return topicCodeMap.get(topic);
 		}
-		int mapSize = topicCodeMap.size();
-		topicCodeMap.put(topic, (byte) mapSize);
-		try {
-			topicCodeDictPage.write(Common.getByteBuffer(topic));
-			topicCodeDictPage.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
+		synchronized (this) {
+			if (topicCodeMap.containsKey(topic)) {
+				return topicCodeMap.get(topic);
+			}
+			int mapSize = topicCodeMap.size();
+			topicCodeMap.put(topic, (byte) mapSize);
+			try {
+				topicCodeDictPage.write(Common.getByteBuffer(topic));
+				topicCodeDictPage.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-
-		return (byte) mapSize;
+		return topicCodeMap.get(topic);
 	}
 
 	@Override
 	public Map<Integer, ByteBuffer> getRange(String topic, int queueId, long offset, int fetchNum) {
-		synchronized (this) {
-			if (!isInited) {
-				init();
-				isInited = true;
-			}
-		}
-		creatStorage(topic);
+		ready(topic);
 		return topicQueueMap.get(topic).getRange(queueId, offset, fetchNum);
 	}
 }

@@ -13,7 +13,7 @@ public class MessageBuffer {
 
 	private static Logger logger = Logger.getLogger(MessageBuffer.class);
 
-	private synchronized void creatStorage(int queueId) {
+	private void creatStorage(int queueId) {
 		if (!cacheMap.containsKey(queueId)) {
 			try {
 				String cachePath;
