@@ -120,20 +120,12 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			e.printStackTrace();
 		}
 
-		try {
-			synchronized (this) {
-				long nowNum = backup.dataNumber;
-				wait(0, Common.syncTime);
-				synchronized (this) {
-					if (lastFlush < backup.dataNumber) {
-						backup.flush();
-						lastFlush = backup.dataNumber;
-						notifyAll();
-					}
-				}
+		sleep(Common.syncTimeMs);
+		synchronized (this) {
+			if (lastFlush < backup.dataNumber) {
+				backup.flush();
+				lastFlush = backup.dataNumber;
 			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 		if (backup.dataNumber % 1000000 == 0)
 			try {
