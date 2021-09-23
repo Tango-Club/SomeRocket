@@ -12,8 +12,8 @@ import java.lang.Process;
 
 public abstract class Common {
 	final static int pageSize = 256 * 1024;
-	final static int syncTimeNs = 0;
-	final static int syncTimeMs = 1;
+	final static int syncTimeNs = 100000;
+	final static int syncTimeMs = 0;
 
 	static String runDir;
 
