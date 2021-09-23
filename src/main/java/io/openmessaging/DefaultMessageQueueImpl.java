@@ -80,7 +80,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			short queueId = backup.dataFile.readShort();
 			Byte topicCode = backup.dataFile.readByte();
 			ByteBuffer buffer = ByteBuffer.allocate(length);
-			backup.dataFile.read(buffer.array());
+			byte[] data = new byte[length];
+			backup.dataFile.read(data);
+			buffer.put(data);
+			buffer.flip();
 			i += 5 + length;
 			backup.dataNumber++;
 

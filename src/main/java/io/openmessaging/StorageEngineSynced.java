@@ -37,7 +37,9 @@ public class StorageEngineSynced {
 		dataFile.writeShort(length);
 		dataFile.writeShort(queueId);
 		dataFile.writeByte(topicCode);
-		dataFile.write(buffer.array());
+		byte[] data = new byte[length];
+		buffer.get(data);
+		dataFile.write(data);
 		dataNumber++;
 	}
 }
