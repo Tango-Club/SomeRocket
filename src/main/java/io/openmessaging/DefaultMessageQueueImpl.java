@@ -73,16 +73,16 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 				e.printStackTrace();
 			}
 		}
-		long lastOffset = 0;
-		backup.dataFileChannel.position(0);
-		for (long i = 1; i <= backup.dataNumber; i++) {
-			backup.metaFile.seek(11 * i);
-			long offset = backup.metaFile.readLong();
-			int queueId = backup.metaFile.readShort();
-			Byte topicCode = backup.metaFile.readByte();
-			ByteBuffer buffer = backup.readNoSeek((int) (offset - lastOffset));
 
-			lastOffset = offset;
+		long fileLength = backup.dataFile.length();
+		for (long i = 0; i < fileLength; i++) {
+			short length = backup.dataFile.readShort();
+			short queueId = backup.dataFile.readShort();
+			Byte topicCode = backup.dataFile.readByte();
+			ByteBuffer buffer = ByteBuffer.allocate(length);
+			backup.dataFile.read(buffer.array());
+			i += 5 + length;
+			backup.dataNumber++;
 
 			String topic = reverseMap.get(topicCode);
 			try {
