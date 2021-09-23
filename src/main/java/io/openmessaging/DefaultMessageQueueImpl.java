@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
-import java.util.Date;
+import java.util.concurrent.*;
 import org.apache.log4j.Logger;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
@@ -140,6 +140,11 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			result = topicQueueMap.get(topic).appendData(queueId, data);
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		try {
+			TimeUnit.MICROSECONDS.sleep(100);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
