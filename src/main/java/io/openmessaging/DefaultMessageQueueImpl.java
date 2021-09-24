@@ -1,10 +1,10 @@
 package io.openmessaging;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.*;
-import java.util.concurrent.*;
 import org.apache.log4j.Logger;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
@@ -20,10 +20,6 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	long lastFlush = -1;
 
 	void init() {
-		/*
-		 * try { logger.info(Common.readCpuCache()); } catch (Exception e) { }
-		 */
-
 		if (Common.runDir == null)
 			Common.runDir = "";
 		Common.initDirectory(Common.runDir + "/essd");
@@ -50,28 +46,25 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		if (isReload) {
 			try {
 				recover();
-			} catch (IOException e) {
+			} catch (IOException | InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private void recover() throws IOException {
-		Common.cleanPath(Common.runDir + "/essd/cache");
+	private void recover() throws IOException, InterruptedException {
+		Common.cleanPath(Common.runDir + "/essd/cache2");
+		File essdFile = new File(Common.runDir + "/essd/cache");
+		essdFile.renameTo(new File(Common.runDir + "/essd/cache2"));
 		Common.cleanPath(Common.runDir + "/pmem/cache");
 
 		ConcurrentHashMap<Byte, String> reverseMap = new ConcurrentHashMap<>();
 		for (byte i = 0; i < topicCodeDictPage.dataNumber; i++) {
-
 			String topic;
-			try {
-				topic = Common.getString(topicCodeDictPage.getDataByIndex(i));
-				tryCreatStorage(topic);
-				reverseMap.put((Byte) i, topic);
-				topicCodeMap.put(topic, (Byte) i);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			topic = Common.getString(topicCodeDictPage.getDataByIndex(i));
+			tryCreatStorage(topic);
+			reverseMap.put((Byte) i, topic);
+			topicCodeMap.put(topic, (Byte) i);
 		}
 
 		long fileLength = backup.dataFile.length();
@@ -88,17 +81,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			backup.dataNumber++;
 
 			String topic = reverseMap.get(topicCode);
-			try {
-				topicQueueMap.get(topic).appendData(queueId, buffer);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (backup.dataNumber % 1000000 == 0)
-				try {
-					logger.info("dataNum: " + backup.dataNumber + " fileSize: " + backup.dataFile.length());
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
+			topicQueueMap.get(topic).appendData(queueId, buffer);
 		}
 	}
 
@@ -150,24 +133,14 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		try {
-			TimeUnit.MICROSECONDS.sleep(50);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		synchronized (this) {
-			if (lastFlush < backup.dataNumber) {
-				backup.flush();
-				lastFlush = backup.dataNumber;
+		if (lastFlush < backup.dataNumber) {
+			synchronized (this) {
+				if (lastFlush < backup.dataNumber) {
+					backup.flush();
+					lastFlush = backup.dataNumber;
+				}
 			}
 		}
-		if (backup.dataNumber % 1000000 == 0)
-			try {
-				logger.info("dataNum: " + backup.dataNumber + " fileSize: " + backup.dataFile.length());
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-
 		return result;
 	}
 

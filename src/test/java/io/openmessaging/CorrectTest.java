@@ -56,6 +56,14 @@ public class CorrectTest {
 			mp = messageQueue.getRange("b", 1001, 1, 2);
 			Assert.assertEquals(1, mp.size());
 			Assert.assertEquals("2024", Common.getString(mp.get(0)));
+
+			res = messageQueue.append("a", 1000, Common.getByteBuffer("2025"));
+			Assert.assertEquals(1, res);
+
+			mp = messageQueue.getRange("a", 1000, 1, 2);
+			Assert.assertEquals(1, mp.size());
+			Assert.assertEquals("2025", Common.getString(mp.get(0)));
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();

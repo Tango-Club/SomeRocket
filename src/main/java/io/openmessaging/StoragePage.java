@@ -54,12 +54,12 @@ final public class StoragePage {
 	}
 
 	private int getOffsetByIndex(int x) throws IOException {
-		offsetFile.seek(x * 4);
+		offsetFile.seek(x << 2);
 		return offsetFile.readInt();
 	}
 
 	private void appendOffset(int offset) throws IOException {
-		offsetFile.seek(dataNumber * 4);
+		offsetFile.seek(dataNumber << 2);
 		offsetFile.writeInt(offset);
 	}
 
@@ -78,7 +78,7 @@ final public class StoragePage {
 		open();
 
 		if (exist) {
-			this.dataNumber = (int) offsetFile.length() / 4 - 1;
+			this.dataNumber = ((int) offsetFile.length() >> 2) - 1;
 			this.lastOffset = getOffsetByIndex(dataNumber - 1);
 		} else {
 			this.dataNumber = 0;
