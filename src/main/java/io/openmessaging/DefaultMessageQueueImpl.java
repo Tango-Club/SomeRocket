@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.*;
 import org.apache.log4j.Logger;
 
@@ -53,9 +54,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	}
 
 	private void recover() throws IOException, InterruptedException {
-		Common.cleanPath(Common.runDir + "/essd/cache2");
-		File essdFile = new File(Common.runDir + "/essd/cache");
-		essdFile.renameTo(new File(Common.runDir + "/essd/cache2"));
+		Common.cleanPath(Common.runDir + "/essd/cache");
 		Common.cleanPath(Common.runDir + "/pmem/cache");
 
 		ConcurrentHashMap<Byte, String> reverseMap = new ConcurrentHashMap<>();
@@ -68,7 +67,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 
 		long fileLength = backup.dataFile.length();
-		for (long i = 0; i < fileLength; i++) {
+		for (long i = 0; i < fileLength; ) {
 			short length = backup.dataFile.readShort();
 			short queueId = backup.dataFile.readShort();
 			Byte topicCode = backup.dataFile.readByte();
