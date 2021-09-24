@@ -1,6 +1,5 @@
 package io.openmessaging;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
@@ -133,6 +132,11 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			e.printStackTrace();
 		}
 		if (lastFlush < backup.dataNumber) {
+			try {
+				TimeUnit.MILLISECONDS.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			synchronized (this) {
 				if (lastFlush < backup.dataNumber) {
 					backup.flush();
