@@ -90,11 +90,15 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			String topic = reverseMap.get(topicCode);
 			try {
 				topicQueueMap.get(topic).appendData(queueId, buffer);
-			} catch (IOException e) {
-				e.printStackTrace();
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			if (backup.dataNumber % 1000000 == 0)
+				try {
+					logger.info("dataNum: " + backup.dataNumber + " fileSize: " + backup.dataFile.length());
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 		}
 	}
 
@@ -147,7 +151,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			e.printStackTrace();
 		}
 		try {
-			TimeUnit.MICROSECONDS.sleep(100);
+			TimeUnit.MICROSECONDS.sleep(50);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
