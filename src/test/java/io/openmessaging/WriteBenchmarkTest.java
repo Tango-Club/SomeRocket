@@ -2,6 +2,7 @@ package io.openmessaging;
 
 import java.io.FileNotFoundException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,53 +23,23 @@ public class WriteBenchmarkTest {
 		int queueId = 123;
 
 		try {
-			int x = 1000;
+			int x = 100;
+			int y = 50;
 			for (int i = 0; i < x; i++) {
-				CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-					try {
-						messageQueue.append(topic, queueId, Common.getByteBuffer(text));
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				});
-				CompletableFuture<Void> future2 = CompletableFuture.runAsync(() -> {
-					try {
-						messageQueue.append(topic, queueId + 1, Common.getByteBuffer(text));
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				});
-				CompletableFuture<Void> future3 = CompletableFuture.runAsync(() -> {
-					try {
-						messageQueue.append(topic, queueId + 2, Common.getByteBuffer(text));
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				});
-				CompletableFuture<Void> future4 = CompletableFuture.runAsync(() -> {
-					try {
-						messageQueue.append(topic, queueId + 3, Common.getByteBuffer(text));
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				});
-				CompletableFuture<Void> future5 = CompletableFuture.runAsync(() -> {
-					try {
-						messageQueue.append(topic, queueId + 4, Common.getByteBuffer(text));
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				});
-				future.get();
-				future2.get();
-				future3.get();
-				future4.get();
-				future5.get();
+				ArrayList<CompletableFuture<Void>> futures = new ArrayList<CompletableFuture<Void>>();
+				for (int j = 0; j < y; j++) {
+					final int id = queueId + j;
+					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+						try {
+							messageQueue.append(topic, id, Common.getByteBuffer(text));
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						}
+					});
+					futures.add(future);
+				}
+				for (CompletableFuture<Void> future : futures)
+					future.get();
 			}
 
 			for (int i = 0; i < x; i++) {
