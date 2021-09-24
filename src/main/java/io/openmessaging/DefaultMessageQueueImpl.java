@@ -66,7 +66,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 
 		long fileLength = backup.dataFile.length();
-		for (long i = 0; i < fileLength; ) {
+		for (long i = 0; i < fileLength;) {
 			short length = backup.dataFile.readShort();
 			short queueId = backup.dataFile.readShort();
 			Byte topicCode = backup.dataFile.readByte();
@@ -131,21 +131,26 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		backup.flush();
+		//lastFlush = backup.dataNumber;
+		/*
 		if (lastFlush < backup.dataNumber) {
-			
+
 			try {
-				TimeUnit.MICROSECONDS.sleep(100);
+				TimeUnit.MILLISECONDS.sleep(5);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			
-			synchronized (this) {
-				if (lastFlush < backup.dataNumber) {
-					backup.flush();
-					lastFlush = backup.dataNumber;
+			if (lastFlush < backup.dataNumber) {
+				synchronized (this) {
+					if (lastFlush < backup.dataNumber) {
+						backup.flush();
+						lastFlush = backup.dataNumber;
+					}
 				}
 			}
 		}
+		*/
 		return result;
 	}
 
