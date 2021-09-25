@@ -131,26 +131,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		backup.flush();
-		//lastFlush = backup.dataNumber;
-		/*
 		if (lastFlush < backup.dataNumber) {
-
-			try {
-				TimeUnit.MILLISECONDS.sleep(5);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (lastFlush < backup.dataNumber) {
-				synchronized (this) {
-					if (lastFlush < backup.dataNumber) {
-						backup.flush();
-						lastFlush = backup.dataNumber;
-					}
-				}
-			}
+			lastFlush = backup.dataNumber;
+			backup.flush();
 		}
-		*/
 		return result;
 	}
 
