@@ -20,10 +20,9 @@
 
 ##### 内存(8G)
 * TopicQueueIdMap/StorageEngine 等内存对象
-* 系统级的cache
+* 系统级的page cache
 ##### PMEM(60G)
-
+* 热数据-33%
 ##### SSD(400G)
-* 冷数据
-  - binary data
-  - binary offset
+* 热数据-66%
+* 冷数据-全量
