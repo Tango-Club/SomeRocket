@@ -118,6 +118,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	public long append(String topic, int queueId, ByteBuffer data) {
 		ready(topic);
 		Byte topicCode = endodeTopic(topic);
+		long now = backup.dataNumber + 1;
 		try {
 			backup.write(topicCode, (short) queueId, data);
 		} catch (IOException e) {
@@ -132,17 +133,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
-		for (int i = 0; i < 10 && lastFlush < backup.dataNumber; i++) {
-			try {
-				TimeUnit.MICROSECONDS.sleep(500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			if (lastFlush < backup.dataNumber) {
+		if (lastFlush < now && backup.dataNumber == now) {
+			if (lastFlush < now) {
 				lastFlush = backup.dataNumber;
 				backup.flush();
-				// logger.info(backup.dataNumber);
 			}
 		}
 		return result;
