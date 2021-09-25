@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.prefs.BackingStoreException;
 import java.util.*;
 import org.apache.log4j.Logger;
 
@@ -131,8 +132,8 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		if (lastFlush < backup.dataNumber) {
-			lastFlush = backup.dataNumber;
+
+		for (int i = 0; i < 10 && lastFlush < backup.dataNumber; i++) {
 			try {
 				TimeUnit.MICROSECONDS.sleep(500);
 			} catch (InterruptedException e) {
@@ -140,16 +141,8 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			}
 			if (lastFlush < backup.dataNumber) {
 				lastFlush = backup.dataNumber;
-				try {
-					TimeUnit.MICROSECONDS.sleep(500);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				if (lastFlush < backup.dataNumber) {
-					lastFlush = backup.dataNumber;
-					backup.flush();
-					//logger.info(backup.dataNumber);
-				}
+				backup.flush();
+				// logger.info(backup.dataNumber);
 			}
 		}
 		return result;
