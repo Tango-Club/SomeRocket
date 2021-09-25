@@ -133,6 +133,12 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 		if (lastFlush < backup.dataNumber) {
 			lastFlush = backup.dataNumber;
+			try {
+				TimeUnit.MILLISECONDS.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			lastFlush = backup.dataNumber;
 			backup.flush();
 		}
 		return result;
