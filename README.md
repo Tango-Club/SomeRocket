@@ -2,7 +2,7 @@
 * 多线程同步落盘优化
 * page size 调参
 * PMEM cache优化
-	* 已读page清出pmem
+	* 已读page清出pmem 把pmem存储热数据占比提升到50%
 	* pmem lib 接入
 
 ### 参考资料
