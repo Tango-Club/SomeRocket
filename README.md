@@ -1,6 +1,7 @@
 ### TODOLIST
 * 多线程同步落盘优化
 * page size 调参
+* 堆外内存cache
 * PMEM cache优化
 	* 已读page清出pmem 把pmem存储热数据占比提升到50%
 	* pmem lib 接入
@@ -19,7 +20,7 @@
 
 ### 当前存储结构
 
-##### 内存(8G)
+##### 内存(2G堆内内存/6G堆外内存)
 * TopicQueueIdMap/StorageEngine 等内存对象
 * 系统级的page cache
 ##### PMEM(60G)
