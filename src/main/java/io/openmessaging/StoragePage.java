@@ -2,6 +2,7 @@ package io.openmessaging;
 
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -86,6 +87,13 @@ final public class StoragePage {
 			this.lastOffset = 0;
 			appendOffset(0);
 		}
+	}
+
+	public void delete() {
+		File data = new File(dataPath);
+		data.delete();
+		File offset = new File(offsetPath);
+		offset.delete();
 	}
 
 	public void write(ByteBuffer buffer) throws IOException {

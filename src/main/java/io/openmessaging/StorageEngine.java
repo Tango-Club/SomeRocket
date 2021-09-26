@@ -105,6 +105,10 @@ public class StorageEngine {
 			if (pageId != pages.size() - 1)
 				pages.get(pageId).close();
 
+			if (pageIndex == pages.get(pageId).dataNumber && pageId + 1 < pages.size()) {
+				pages.get(pageId).delete();
+			}
+
 			if (pageIndex == pages.get(pageId).dataNumber) {
 				pageIndex = 0;
 				pageId++;

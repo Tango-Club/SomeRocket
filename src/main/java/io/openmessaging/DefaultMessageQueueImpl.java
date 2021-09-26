@@ -66,7 +66,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 
 		long fileLength = backup.dataFile.length();
-		for (long i = 0; i < fileLength; ) {
+		for (long i = 0; i < fileLength;) {
 			short length = backup.dataFile.readShort();
 			short queueId = backup.dataFile.readShort();
 			Byte topicCode = backup.dataFile.readByte();
@@ -127,11 +127,6 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			e.printStackTrace();
 		}
 		if (lastFlush < now && backup.dataNumber == now) {
-			try {
-				TimeUnit.MICROSECONDS.sleep(500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
 			if (lastFlush < now) {
 				lastFlush = backup.dataNumber;
 				backup.flush();
