@@ -9,8 +9,8 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 final public class StoragePage {
-	String dataPath;
-	String offsetPath;
+	final String dataPath;
+	final String offsetPath;
 
 	RandomAccessFile dataFile;
 	RandomAccessFile offsetFile;
@@ -22,7 +22,7 @@ final public class StoragePage {
 
 	boolean isReload;
 
-	private static Logger logger = Logger.getLogger(StorageEngine.class);
+	private static final Logger logger = Logger.getLogger(StorageEngine.class);
 
 	public void flush() {
 		try {
@@ -54,12 +54,12 @@ final public class StoragePage {
 	}
 
 	private int getOffsetByIndex(int x) throws IOException {
-		offsetFile.seek(x << 2);
+		offsetFile.seek((long) x << 2);
 		return offsetFile.readInt();
 	}
 
 	private void appendOffset(int offset) throws IOException {
-		offsetFile.seek(dataNumber << 2);
+		offsetFile.seek((long) dataNumber << 2);
 		offsetFile.writeInt(offset);
 	}
 
@@ -118,7 +118,7 @@ final public class StoragePage {
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(int index, int fetchNum, int preFix) {
-		HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
+		HashMap<Integer, ByteBuffer> result = new HashMap<>();
 		try {
 			dataFileChannel.position(getOffsetByIndex(index));
 			for (int i = 0; i < fetchNum; i++) {

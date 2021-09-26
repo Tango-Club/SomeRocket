@@ -4,6 +4,5 @@
 *.iml
 target/
 .logs/*
-.logs/*
 ./persistent_heap
 

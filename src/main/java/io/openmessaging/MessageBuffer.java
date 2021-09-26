@@ -7,13 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
 
 public class MessageBuffer {
-	ConcurrentHashMap<Integer, StorageEngine> cacheMap = new ConcurrentHashMap<>();
-	String topic;
-	String cachePath;
+	final ConcurrentHashMap<Integer, StorageEngine> cacheMap = new ConcurrentHashMap<>();
+	final String topic;
 
-	private static Logger logger = Logger.getLogger(MessageBuffer.class);
+	private static final Logger logger = Logger.getLogger(MessageBuffer.class);
 
-	private void creatStorage(int queueId) {
+	private void createStorage(int queueId) {
 		if (!cacheMap.containsKey(queueId)) {
 			try {
 				String cachePath;
@@ -29,17 +28,17 @@ public class MessageBuffer {
 		}
 	}
 
-	MessageBuffer(String topic) throws IOException {
+	MessageBuffer(String topic) {
 		this.topic = topic;
 	}
 
-	public long appendData(int queueId, ByteBuffer data) throws IOException, InterruptedException {
-		creatStorage(queueId);
+	public long appendData(int queueId, ByteBuffer data) throws IOException {
+		createStorage(queueId);
 		return cacheMap.get(queueId).write(data);
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(int queueId, long offset, int fetchNum) {
-		creatStorage(queueId);
+		createStorage(queueId);
 		return cacheMap.get(queueId).getRange(offset, fetchNum);
 	}
 }

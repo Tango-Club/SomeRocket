@@ -26,7 +26,7 @@ public class WriteBenchmarkTest {
 			int x = 100;
 			int y = 50;
 			for (int i = 0; i < x; i++) {
-				ArrayList<CompletableFuture<Void>> futures = new ArrayList<CompletableFuture<Void>>();
+				ArrayList<CompletableFuture<Void>> futures = new ArrayList<>();
 				for (int j = 0; j < y; j++) {
 					final int id = queueId + j;
 					CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {

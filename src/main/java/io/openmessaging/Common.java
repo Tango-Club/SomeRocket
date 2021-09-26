@@ -2,8 +2,8 @@ package io.openmessaging;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.io.InputStream;
 import java.io.BufferedReader;
@@ -15,20 +15,20 @@ public abstract class Common {
 
 	static String runDir;
 
-	public static final String readCpuCache() throws IOException {
+	public static String readCpuCache() throws IOException {
 		final ProcessBuilder pb = new ProcessBuilder("sh", "-c", "getconf -a |grep CACHE");
 		pb.redirectErrorStream(true);
 
 		final Process process = pb.start();
 		final InputStream in = process.getInputStream();
-		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
-		String result = "";
+		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+		StringBuilder result = new StringBuilder();
 		String line;
 		while ((line = bufferedReader.readLine()) != null) {
-			result += line;
-			result += "\n";
+			result.append(line);
+			result.append("\n");
 		}
-		return result;
+		return result.toString();
 
 	}
 
@@ -62,13 +62,11 @@ public abstract class Common {
 		return false;
 	}
 
-	public static boolean initPath(String path) throws IOException {
+	public static void initPath(String path) throws IOException {
 		File file = new File(path);
 		if (!file.exists()) {
 			file.createNewFile();
-			return true;
 		}
-		return false;
 	}
 
 	public static ByteBuffer getByteBuffer(String str) {
@@ -76,11 +74,6 @@ public abstract class Common {
 	}
 
 	public static String getString(ByteBuffer buffer) {
-		try {
-			return new String(buffer.array(), 0, buffer.capacity(), "utf-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return new String(buffer.array(), 0, buffer.capacity(), StandardCharsets.UTF_8);
 	}
 }

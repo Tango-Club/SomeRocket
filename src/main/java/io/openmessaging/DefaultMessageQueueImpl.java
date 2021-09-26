@@ -8,11 +8,11 @@ import java.util.*;
 import org.apache.log4j.Logger;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
-	private static Logger logger = Logger.getLogger(DefaultMessageQueueImpl.class);
+	private static final Logger logger = Logger.getLogger(DefaultMessageQueueImpl.class);
 
-	ConcurrentHashMap<String, MessageBuffer> topicQueueMap = new ConcurrentHashMap<>();
+	final ConcurrentHashMap<String, MessageBuffer> topicQueueMap = new ConcurrentHashMap<>();
 	StorageEngineSynced backup;
-	ConcurrentHashMap<String, Byte> topicCodeMap = new ConcurrentHashMap<>();
+	final ConcurrentHashMap<String, Byte> topicCodeMap = new ConcurrentHashMap<>();
 
 	StoragePage topicCodeDictPage;
 
@@ -31,7 +31,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 		boolean isReload = !Common.initDirectory(storagePath);
 		try {
-			backup = new StorageEngineSynced(storagePath, isReload);
+			backup = new StorageEngineSynced(storagePath);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -46,13 +46,13 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		if (isReload) {
 			try {
 				recover();
-			} catch (IOException | InterruptedException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	private void recover() throws IOException, InterruptedException {
+	private void recover() throws IOException {
 		Common.cleanPath(Common.runDir + "/essd/cache");
 		Common.cleanPath(Common.runDir + "/pmem/cache");
 
@@ -60,9 +60,9 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		for (byte i = 0; i < topicCodeDictPage.dataNumber; i++) {
 			String topic;
 			topic = Common.getString(topicCodeDictPage.getDataByIndex(i));
-			tryCreatStorage(topic);
-			reverseMap.put((Byte) i, topic);
-			topicCodeMap.put(topic, (Byte) i);
+			tryCreateStorage(topic);
+			reverseMap.put(i, topic);
+			topicCodeMap.put(topic, i);
 		}
 
 		long fileLength = backup.dataFile.length();
@@ -85,7 +85,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 	private void ready(String topic) {
 		tryInit();
-		tryCreatStorage(topic);
+		tryCreateStorage(topic);
 	}
 
 	private void tryInit() {
@@ -99,16 +99,12 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 	}
 
-	private void tryCreatStorage(String topic) {
+	private void tryCreateStorage(String topic) {
 		if (topicQueueMap.containsKey(topic))
 			return;
 		synchronized (this) {
 			if (!topicQueueMap.containsKey(topic)) {
-				try {
-					topicQueueMap.put(topic, new MessageBuffer(topic));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				topicQueueMap.put(topic, new MessageBuffer(topic));
 			}
 		}
 	}
@@ -116,7 +112,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	@Override
 	public long append(String topic, int queueId, ByteBuffer data) {
 		ready(topic);
-		Byte topicCode = endodeTopic(topic);
+		Byte topicCode = encodeTopic(topic);
 		long now = backup.dataNumber + 1;
 		try {
 			backup.write(topicCode, (short) queueId, data);
@@ -128,8 +124,6 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		try {
 			result = topicQueueMap.get(topic).appendData(queueId, data);
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		if (lastFlush < now && backup.dataNumber == now) {
@@ -146,7 +140,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		return result;
 	}
 
-	private Byte endodeTopic(String topic) {
+	private Byte encodeTopic(String topic) {
 		if (topicCodeMap.containsKey(topic)) {
 			return topicCodeMap.get(topic);
 		}

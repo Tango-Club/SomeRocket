@@ -9,14 +9,14 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 public class StorageEngine {
-	private static Logger logger = Logger.getLogger(StorageEngine.class);
+	private static final Logger logger = Logger.getLogger(StorageEngine.class);
 	
-	String storagePath;
+	final String storagePath;
 
 	boolean isReload = false;
 
-	ArrayList<Long> dataNumPre = new ArrayList<Long>();
-	ArrayList<StoragePage> pages = new ArrayList<StoragePage>();
+	final ArrayList<Long> dataNumPre = new ArrayList<>();
+	final ArrayList<StoragePage> pages = new ArrayList<>();
 
 	public boolean isReload() {
 		return isReload;
@@ -40,7 +40,7 @@ public class StorageEngine {
 
 	public StorageEngine(String topic, int queueId, String basePath) throws IOException {
 		Common.initDirectory(basePath);
-		String storagePath = basePath + "/ds_" + topic + "_" + Integer.toString(queueId);
+		String storagePath = basePath + "/ds_" + topic + "_" + queueId;
 
 		boolean exist = !Common.initDirectory(storagePath);
 
@@ -50,7 +50,7 @@ public class StorageEngine {
 		if (exist) {
 			isReload = true;
 			for (int pageId = 0; true; pageId++) {
-				String pagePath = storagePath + "/" + Integer.toString(pageId);
+				String pagePath = storagePath + "/" + pageId;
 				if (!new File(pagePath + ".data").exists())
 					break;
 				pages.add(new StoragePage(pagePath, true));
@@ -67,7 +67,7 @@ public class StorageEngine {
 			if (pages.size() != 0) {
 				getLastPage().close();
 			}
-			String pagePath = storagePath + "/" + Integer.toString(pages.size());
+			String pagePath = storagePath + "/" + pages.size();
 			pages.add(new StoragePage(pagePath, false));
 			dataNumPre.add(getDataNum());
 		}
@@ -77,8 +77,8 @@ public class StorageEngine {
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(long index, int fetchNum) {
-		fetchNum = (int) Math.min((long) fetchNum, getDataNum() - index);
-		HashMap<Integer, ByteBuffer> result = new HashMap<Integer, ByteBuffer>();
+		fetchNum = (int) Math.min(fetchNum, getDataNum() - index);
+		HashMap<Integer, ByteBuffer> result = new HashMap<>();
 		if (fetchNum <= 0)
 			return result;
 

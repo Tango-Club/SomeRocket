@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.io.FileNotFoundException;
 import java.util.Map;
 
+@SuppressWarnings("ALL")
 public abstract class MessageQueue {
 	/**
 	 * 写入一条信息； 返回的long值为offset，用于从这个topic+queueId中读取这条数据

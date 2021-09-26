@@ -15,7 +15,7 @@ public class CorrectTest {
 
 		MessageQueue messageQueue = new DefaultMessageQueueImpl();
 		try {
-			long res = -1;
+			long res;
 
 			res = messageQueue.append("a", 1001, Common.getByteBuffer("2021"));
 			Assert.assertEquals(0, res);
