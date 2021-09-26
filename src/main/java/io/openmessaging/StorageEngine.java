@@ -1,42 +1,20 @@
 package io.openmessaging;
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.apache.log4j.Logger;
-
 public class StorageEngine {
 	private static final Logger logger = Logger.getLogger(StorageEngine.class);
-	
+
 	final String storagePath;
-
-	boolean isReload = false;
-
 	final ArrayList<Long> dataNumPre = new ArrayList<>();
 	final ArrayList<StoragePage> pages = new ArrayList<>();
-
-	public boolean isReload() {
-		return isReload;
-	}
-
-	void updateDataNum() {
-		dataNumPre.set(dataNumPre.size() - 1, getDataNum() + 1);
-	}
-
-	Long getDataNum() {
-		return dataNumPre.get(dataNumPre.size() - 1);
-	}
-
-	StoragePage getLastPage() {
-		return pages.get(pages.size() - 1);
-	}
-
-	int getPageDataNum(int pageId) throws IOException {
-		return (int) pages.get(pageId).offsetFile.length() / 4;
-	}
+	boolean isReload = false;
 
 	public StorageEngine(String topic, int queueId, String basePath) throws IOException {
 		Common.initDirectory(basePath);
@@ -60,6 +38,26 @@ public class StorageEngine {
 				pages.get(pageId).close();
 			}
 		}
+	}
+
+	public boolean isReload() {
+		return isReload;
+	}
+
+	void updateDataNum() {
+		dataNumPre.set(dataNumPre.size() - 1, getDataNum() + 1);
+	}
+
+	Long getDataNum() {
+		return dataNumPre.get(dataNumPre.size() - 1);
+	}
+
+	StoragePage getLastPage() {
+		return pages.get(pages.size() - 1);
+	}
+
+	int getPageDataNum(int pageId) throws IOException {
+		return (int) pages.get(pageId).offsetFile.length() / 4;
 	}
 
 	public long write(ByteBuffer buffer) throws IOException {

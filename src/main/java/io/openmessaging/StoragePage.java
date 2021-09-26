@@ -1,12 +1,13 @@
 package io.openmessaging;
 
+import org.apache.log4j.Logger;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
-import org.apache.log4j.Logger;
 
 final public class StoragePage {
 	final String dataPath;

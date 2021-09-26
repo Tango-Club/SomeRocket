@@ -1,19 +1,19 @@
 package io.openmessaging;
 
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.*;
-import org.apache.log4j.Logger;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
 	private static final Logger logger = Logger.getLogger(DefaultMessageQueueImpl.class);
 
 	final ConcurrentHashMap<String, MessageBuffer> topicQueueMap = new ConcurrentHashMap<>();
-	StorageEngineSynced backup;
 	final ConcurrentHashMap<String, Byte> topicCodeMap = new ConcurrentHashMap<>();
-
+	StorageEngineSynced backup;
 	StoragePage topicCodeDictPage;
 
 	boolean isInited = false;
@@ -66,7 +66,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 
 		long fileLength = backup.dataFile.length();
-		for (long i = 0; i < fileLength;) {
+		for (long i = 0; i < fileLength; ) {
 			short length = backup.dataFile.readShort();
 			short queueId = backup.dataFile.readShort();
 			Byte topicCode = backup.dataFile.readByte();
