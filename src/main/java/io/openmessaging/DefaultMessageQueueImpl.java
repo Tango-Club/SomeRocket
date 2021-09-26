@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.prefs.BackingStoreException;
 import java.util.*;
 import org.apache.log4j.Logger;
 

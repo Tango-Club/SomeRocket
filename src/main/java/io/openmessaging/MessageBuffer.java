@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
 
 public class MessageBuffer {
-	ConcurrentHashMap<Integer, DiskStorage> cacheMap = new ConcurrentHashMap<>();
+	ConcurrentHashMap<Integer, StorageEngine> cacheMap = new ConcurrentHashMap<>();
 	String topic;
 	String cachePath;
 
@@ -22,7 +22,7 @@ public class MessageBuffer {
 				else
 					cachePath = Common.runDir + "/pmem/cache";
 
-				cacheMap.put(queueId, new DiskStorage(topic, queueId, cachePath));
+				cacheMap.put(queueId, new StorageEngine(topic, queueId, cachePath));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -35,11 +35,11 @@ public class MessageBuffer {
 
 	public long appendData(int queueId, ByteBuffer data) throws IOException, InterruptedException {
 		creatStorage(queueId);
-		return cacheMap.get(queueId).writeToDisk(data);
+		return cacheMap.get(queueId).write(data);
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(int queueId, long offset, int fetchNum) {
 		creatStorage(queueId);
-		return cacheMap.get(queueId).readFromDisk(offset, fetchNum);
+		return cacheMap.get(queueId).getRange(offset, fetchNum);
 	}
 }

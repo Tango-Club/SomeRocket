@@ -9,14 +9,14 @@ import java.util.HashMap;
 import org.apache.log4j.Logger;
 
 public class StorageEngine {
+	private static Logger logger = Logger.getLogger(StorageEngine.class);
+	
 	String storagePath;
 
 	boolean isReload = false;
 
 	ArrayList<Long> dataNumPre = new ArrayList<Long>();
 	ArrayList<StoragePage> pages = new ArrayList<StoragePage>();
-
-	private static Logger logger = Logger.getLogger(StorageEngine.class);
 
 	public boolean isReload() {
 		return isReload;
@@ -38,7 +38,12 @@ public class StorageEngine {
 		return (int) pages.get(pageId).offsetFile.length() / 4;
 	}
 
-	StorageEngine(String storagePath, boolean exist) throws IOException {
+	public StorageEngine(String topic, int queueId, String basePath) throws IOException {
+		Common.initDirectory(basePath);
+		String storagePath = basePath + "/ds_" + topic + "_" + Integer.toString(queueId);
+
+		boolean exist = !Common.initDirectory(storagePath);
+
 		this.storagePath = storagePath;
 
 		dataNumPre.add(0L);
