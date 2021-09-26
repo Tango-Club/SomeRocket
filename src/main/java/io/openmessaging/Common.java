@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 public abstract class Common {
-	final static int pageSize = 512 * 1024;
+	final static int pageSize = 256 * 1024;
 
 	static String runDir;
 
