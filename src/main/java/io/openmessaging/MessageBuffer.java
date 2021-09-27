@@ -20,7 +20,7 @@ public class MessageBuffer {
 		if (!cacheMap.containsKey(queueId)) {
 			try {
 				String cachePath;
-				if ((queueId % 7) <= 1)
+				if ((queueId % 4) == 0)
 					cachePath = Common.runDir + "/essd/cache";
 				else
 					cachePath = Common.runDir + "/pmem/cache";
