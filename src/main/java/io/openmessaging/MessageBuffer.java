@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class MessageBuffer {
 	private static final Logger logger = Logger.getLogger(MessageBuffer.class);
-	final ConcurrentHashMap<Integer, StorageEngine> cacheMap = new ConcurrentHashMap<>();
+	final ConcurrentHashMap<Integer, StorageEngineEssd> cacheMap = new ConcurrentHashMap<>();
 	final String topic;
 
 	MessageBuffer(String topic) {
@@ -18,16 +18,13 @@ public class MessageBuffer {
 
 	private void createStorage(int queueId) {
 		if (!cacheMap.containsKey(queueId)) {
-			try {
-				String cachePath;
-				if ((queueId % 9) <= 1)
-					cachePath = Common.runDir + "/essd/cache";
-				else
-					cachePath = Common.runDir + "/pmem/cache";
-
-				cacheMap.put(queueId, new StorageEngine(topic, queueId, cachePath));
-			} catch (IOException e) {
-				e.printStackTrace();
+			String cachePath;
+			if ((queueId % 4) <= 0) {
+				cachePath = Common.runDir + "/essd/cache";
+				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath));
+			} else {
+				cachePath = Common.runDir + "/pmem/cache";
+				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath));
 			}
 		}
 	}

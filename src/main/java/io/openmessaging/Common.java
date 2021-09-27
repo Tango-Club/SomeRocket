@@ -5,10 +5,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+import com.intel.pmem.llpl.Heap;
+
 public abstract class Common {
 	final static int pageSize = 256 * 1024;
-
-	static String runDir;
+	final static long heapSize = 60l * 1024 * 1024 * 1024;
+	public static Heap heap;
+	public static String runDir;
 
 	public static String readCpuCache() throws IOException {
 		final ProcessBuilder pb = new ProcessBuilder("sh", "-c", "getconf -a |grep CACHE");

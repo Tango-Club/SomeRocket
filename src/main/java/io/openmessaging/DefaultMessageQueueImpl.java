@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+
+import com.intel.pmem.llpl.Heap;
 
 public class DefaultMessageQueueImpl extends MessageQueue {
 	private static final Logger logger = Logger.getLogger(DefaultMessageQueueImpl.class);
@@ -14,18 +15,30 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	final ConcurrentHashMap<String, MessageBuffer> topicQueueMap = new ConcurrentHashMap<>();
 	final ConcurrentHashMap<String, Byte> topicCodeMap = new ConcurrentHashMap<>();
 	StorageEngineSynced backup;
-	StoragePage topicCodeDictPage;
+	StoragePageEssd topicCodeDictPage;
 
 	boolean isInited = false;
 	long lastFlush = -1;
 
 	void init() {
+		try {
+			Common.runDir = System.getenv("runDir");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		if (Common.runDir == null)
 			Common.runDir = "";
-		Common.initDirectory(Common.runDir + "/essd");
+
 		Common.initDirectory(Common.runDir + "/pmem");
-		Common.initDirectory(Common.runDir + "/essd/cache");
 		Common.initDirectory(Common.runDir + "/pmem/cache");
+
+		String heapPath = Common.runDir + "/pmem/heap0";
+		boolean initialized = Heap.exists(heapPath);
+		logger.info("heap initialized: "+initialized);
+		Common.heap = initialized ? Heap.openHeap(heapPath) : Heap.createHeap(heapPath, Common.heapSize);
+
+		Common.initDirectory(Common.runDir + "/essd");
+		Common.initDirectory(Common.runDir + "/essd/cache");
 
 		String storagePath = Common.runDir + "/essd/sync";
 
@@ -38,7 +51,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 		String dictPath = storagePath + "/dict";
 		try {
-			topicCodeDictPage = new StoragePage(dictPath, isReload);
+			topicCodeDictPage = new StoragePageEssd(dictPath, isReload);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
