@@ -10,7 +10,10 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.HashMap;
 
-public class StoragePageEssd extends StoragePage {
+public class StoragePageEssd {
+	public int dataNumber;
+	public int lastOffset;
+	
 	final String dataPath;
 	final String offsetPath;
 

@@ -7,12 +7,12 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class StorageEngineEssd extends StorageEngine {
+public class StorageEngineEssd {
 	private static final Logger logger = Logger.getLogger(StorageEngineEssd.class);
 
 	final String storagePath;
 	final ArrayList<Long> dataNumPre = new ArrayList<>();
-	final ArrayList<StoragePage> pages = new ArrayList<>();
+	final ArrayList<StoragePageEssd> pages = new ArrayList<>();
 
 	public StorageEngineEssd(String topic, int queueId, String basePath) {
 		Common.initDirectory(basePath);
@@ -30,11 +30,10 @@ public class StorageEngineEssd extends StorageEngine {
 		return dataNumPre.get(dataNumPre.size() - 1);
 	}
 
-	private StoragePage getLastPage() {
+	private StoragePageEssd getLastPage() {
 		return pages.get(pages.size() - 1);
 	}
 
-	@Override
 	public long write(ByteBuffer buffer) {
 		if (pages.size() == 0 || getLastPage().lastOffset + buffer.capacity() > Common.pageSize) {
 			if (pages.size() != 0) {
@@ -57,7 +56,6 @@ public class StorageEngineEssd extends StorageEngine {
 		return getDataNum() - 1;
 	}
 
-	@Override
 	public HashMap<Integer, ByteBuffer> getRange(long index, int fetchNum) {
 		fetchNum = (int) Math.min(fetchNum, getDataNum() - index);
 		HashMap<Integer, ByteBuffer> result = new HashMap<>();
