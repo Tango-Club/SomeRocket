@@ -28,4 +28,4 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Run Unit Test
         run: |
-          export rundir=. mvn test
+          export rundir="./"&& sudo mvn test
