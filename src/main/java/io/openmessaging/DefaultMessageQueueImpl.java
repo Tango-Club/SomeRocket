@@ -35,7 +35,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		String heapPath = Common.runDir + "/pmem/heap0";
 		boolean initialized = Heap.exists(heapPath);
 		logger.info("heap initialized: "+initialized);
-		Common.heap = initialized ? Heap.openHeap(heapPath) : Heap.createHeap(heapPath, Common.heapSize);
+		Common.heap = initialized ? Heap.openHeap(heapPath) : Heap.createHeap(heapPath, 1024);
 
 		Common.initDirectory(Common.runDir + "/essd");
 		Common.initDirectory(Common.runDir + "/essd/cache");
