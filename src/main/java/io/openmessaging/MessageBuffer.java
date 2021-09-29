@@ -20,7 +20,7 @@ public class MessageBuffer {
 		if (!cacheMap.containsKey(queueId)) {
 			String cachePath;
 			String offsetPath;
-			if ((queueId % 100) < 33) {
+			if ((queueId % 100) < 27) {
 				cachePath = Common.runDir + "/essd/cache";
 				offsetPath = Common.runDir + "/pmem/cache";
 				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath, offsetPath));
