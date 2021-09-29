@@ -23,6 +23,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	void init() {
 		try {
 			Common.runDir = System.getenv("runDir");
+			logger.info(Common.readEnvInfo());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

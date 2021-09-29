@@ -13,8 +13,8 @@ public abstract class Common {
 	public static Heap heap;
 	public static String runDir;
 
-	public static String readCpuCache() throws IOException {
-		final ProcessBuilder pb = new ProcessBuilder("sh", "-c", "getconf -a |grep CACHE");
+	public static String readEnvInfo() throws IOException {
+		final ProcessBuilder pb = new ProcessBuilder("sh", "-c", "getconf -a");
 		pb.redirectErrorStream(true);
 
 		final Process process = pb.start();
