@@ -11,14 +11,19 @@ public class StorageEngineEssd {
 	private static final Logger logger = Logger.getLogger(StorageEngineEssd.class);
 
 	final String storagePath;
+	final String offsetPath;
 	final ArrayList<Long> dataNumPre = new ArrayList<>();
 	final ArrayList<StoragePageEssd> pages = new ArrayList<>();
 
-	public StorageEngineEssd(String topic, int queueId, String basePath) {
-		Common.initDirectory(basePath);
-		String storagePath = basePath + "/ds_" + topic + "_" + queueId;
-		this.storagePath = storagePath;
+	public StorageEngineEssd(String topic, int queueId, String storageBase, String offsetBase) {
+		Common.initDirectory(storageBase);
+		storagePath = storageBase + "/ds_" + topic + "_" + queueId;
 		Common.initDirectory(storagePath);
+
+		Common.initDirectory(offsetBase);
+		offsetPath = offsetBase + "/ds_" + topic + "_" + queueId;
+		Common.initDirectory(offsetPath);
+
 		dataNumPre.add(0L);
 	}
 
@@ -39,9 +44,10 @@ public class StorageEngineEssd {
 			if (pages.size() != 0) {
 				getLastPage().close();
 			}
-			String pagePath = storagePath + "/" + pages.size();
+			String pageStoragePath = storagePath + "/" + pages.size();
+			String pageOffsetPath = offsetPath + "/" + pages.size();
 			try {
-				pages.add(new StoragePageEssd(pagePath, false));
+				pages.add(new StoragePageEssd(pageStoragePath, pageOffsetPath, false));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

@@ -19,12 +19,15 @@ public class MessageBuffer {
 	private void createStorage(int queueId) {
 		if (!cacheMap.containsKey(queueId)) {
 			String cachePath;
-			if ((queueId % 100) < 23) {
+			String offsetPath;
+			if ((queueId % 100) < 33) {
 				cachePath = Common.runDir + "/essd/cache";
-				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath));
+				offsetPath = Common.runDir + "/pmem/cache";
+				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath, offsetPath));
 			} else {
 				cachePath = Common.runDir + "/pmem/cache";
-				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath));
+				offsetPath = Common.runDir + "/pmem/cache";
+				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath, offsetPath));
 			}
 		}
 	}

@@ -69,9 +69,9 @@ public class StoragePageEssd {
 		return isReload;
 	}
 
-	StoragePageEssd(String basePath, boolean exist) throws IOException {
-		this.dataPath = basePath + ".data";
-		this.offsetPath = basePath + ".offset";
+	StoragePageEssd(String baseStoragePath, String baseOffsetPath, boolean exist) throws IOException {
+		dataPath = baseStoragePath + ".data";
+		offsetPath = baseOffsetPath + ".offset";
 		Common.initPath(dataPath);
 		Common.initPath(offsetPath);
 

@@ -32,10 +32,11 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		Common.initDirectory(Common.runDir + "/pmem");
 		Common.initDirectory(Common.runDir + "/pmem/cache");
 
-		//String heapPath = Common.runDir + "/pmem/heap0";
-		//boolean initialized = Heap.exists(heapPath);
-		//logger.info("heap initialized: "+initialized);
-		//Common.heap = initialized ? Heap.openHeap(heapPath) : Heap.createHeap(heapPath, 0);
+		// String heapPath = Common.runDir + "/pmem/heap0";
+		// boolean initialized = Heap.exists(heapPath);
+		// logger.info("heap initialized: "+initialized);
+		// Common.heap = initialized ? Heap.openHeap(heapPath) :
+		// Heap.createHeap(heapPath, 0);
 
 		Common.initDirectory(Common.runDir + "/essd");
 		Common.initDirectory(Common.runDir + "/essd/cache");
@@ -51,7 +52,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 		String dictPath = storagePath + "/dict";
 		try {
-			topicCodeDictPage = new StoragePageEssd(dictPath, isReload);
+			topicCodeDictPage = new StoragePageEssd(dictPath, dictPath, isReload);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
