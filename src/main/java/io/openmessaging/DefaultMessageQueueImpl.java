@@ -132,7 +132,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		data.position(0);
+		data.flip();
 		long result = -1;
 		try {
 			result = topicQueueMap.get(topic).appendData(queueId, data);

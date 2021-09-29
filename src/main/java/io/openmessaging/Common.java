@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import com.intel.pmem.llpl.Heap;
 
 public abstract class Common {
-	final static int pageSize = 128 * 1024;
+	final static int pageSize = 256 * 1024;
 	final static long heapSize = 60l * 1024 * 1024 * 1024;
 	public static Heap heap;
 	public static String runDir;
