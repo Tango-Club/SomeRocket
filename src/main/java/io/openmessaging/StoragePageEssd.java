@@ -13,7 +13,7 @@ import java.util.HashMap;
 public class StoragePageEssd {
 	public int dataNumber;
 	public int lastOffset;
-	
+
 	final String dataPath;
 	final String offsetPath;
 
@@ -98,7 +98,7 @@ public class StoragePageEssd {
 
 	public void write(ByteBuffer buffer) throws IOException {
 		dataFileChannel.position(lastOffset);
-		lastOffset += buffer.capacity();
+		lastOffset += buffer.remaining();
 
 		dataNumber++;
 		dataFileChannel.write(buffer);

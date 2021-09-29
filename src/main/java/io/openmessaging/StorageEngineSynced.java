@@ -30,7 +30,7 @@ public class StorageEngineSynced {
 	}
 
 	public void write(Byte topicCode, short queueId, ByteBuffer buffer) throws IOException {
-		short length = (short) buffer.capacity();
+		short length = (short) buffer.remaining();
 		dataFile.writeShort(length);
 		dataFile.writeShort(queueId);
 		dataFile.writeByte(topicCode);

@@ -35,7 +35,7 @@ public class StorageEngineEssd {
 	}
 
 	public long write(ByteBuffer buffer) {
-		if (pages.size() == 0 || getLastPage().lastOffset + buffer.capacity() > Common.pageSize) {
+		if (pages.size() == 0 || getLastPage().lastOffset + buffer.remaining() > Common.pageSize) {
 			if (pages.size() != 0) {
 				getLastPage().close();
 			}
