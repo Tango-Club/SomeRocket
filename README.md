@@ -1,9 +1,7 @@
 ### TODOLIST
 * 多线程同步落盘优化
-* page size 调参
 * 堆外内存cache
 * PMEM cache优化
-	* 已读page清出pmem 把pmem存储热数据占比提升到50%
 	* pmem lib 接入
 
 ### 参考资料
@@ -24,7 +22,8 @@
 * TopicQueueIdMap/StorageEngine 等内存对象
 * 系统级的page cache
 ##### PMEM(60G)
-* 热数据-33%
+* data - 72%
+* offset - 100%
 ##### SSD(400G)
-* 热数据-66%
-* 冷数据-全量
+* 热数据 - 28% 
+* 冷数据 - 全量
