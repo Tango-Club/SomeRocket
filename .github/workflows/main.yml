@@ -24,8 +24,10 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
+      - name: Install ENV
+        run: sudo apt-get install make build-essential libdaxctl-dev libndctl-dev pandoc m4 libfabric-dev pkg-config
+      - name: Install PMEMDK
+        run: git clone https://github.com/pmem/pmdk.git && cd pmdk && git checkout tags/1.11.0 && sudo make && sudo make install && sudo sed '$a/usr/local/lib' /etc/ld.so.conf && sudo /sbin/ldconfig 
       # Runs a set of commands using the runners shell
       - name: Run Unit Test
-        run: |
-          export rundir=. mvn test
+        run: export rundir="./" && sudo mvn test
