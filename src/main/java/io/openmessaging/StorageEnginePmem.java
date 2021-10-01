@@ -26,6 +26,7 @@ public class StorageEnginePmem extends StorageEngine {
 			MemoryBlock block = blocks.get((int) (index + i));
 			ByteBuffer buffer = ByteBuffer.allocate((int) block.size());
 			block.copyToArray(0, buffer.array(), 0, (int) block.size());
+			block.freeMemory();
 			result.put(i, buffer);
 		}
 		return result;
