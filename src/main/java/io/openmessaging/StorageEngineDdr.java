@@ -35,7 +35,7 @@ public class StorageEngineDdr extends StorageEngine {
 	@Override
 	public long write(ByteBuffer buffer) {
 		ByteBuffer block = ByteBuffer.allocateDirect(buffer.remaining());
-		block.put(buffer.array());
+		block.put(buffer);
 		blocks.add(block);
 		return blocks.size() - 1;
 	}
