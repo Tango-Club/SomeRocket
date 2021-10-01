@@ -23,12 +23,14 @@ public class StorageEngineDdr extends StorageEngine {
 		fetchNum = Math.min(fetchNum, (int) (blocks.size() - index));
 		for (int i = 0; i < fetchNum; i++) {
 			ByteBuffer block = blocks.get((int) (index + i));
-			ByteBuffer buffer = ByteBuffer.allocate(block.capacity());
 			byte[] data = new byte[block.capacity()];
 			block.get(data);
+			((DirectBuffer) block).cleaner().clean();
+
+			ByteBuffer buffer = ByteBuffer.allocate(block.capacity());
 			buffer.put(data);
 			buffer.flip();
-			((DirectBuffer) block).cleaner().clean();
+
 			result.put(i, buffer);
 		}
 		return result;
@@ -38,6 +40,7 @@ public class StorageEngineDdr extends StorageEngine {
 	public long write(ByteBuffer buffer) {
 		ByteBuffer block = ByteBuffer.allocateDirect(buffer.remaining());
 		block.put(buffer);
+		block.flip();
 		blocks.add(block);
 		return blocks.size() - 1;
 	}
