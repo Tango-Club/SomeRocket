@@ -33,9 +33,7 @@ public class StorageEnginePmem extends StorageEngine {
 
 	@Override
 	public long write(ByteBuffer buffer) {
-		logger.info("write" + buffer);
-		MemoryBlock block = Common.heap.allocateMemoryBlock(buffer.capacity(), false);
-		Common.heap.setRoot(block.handle());
+		MemoryBlock block = Common.heap.allocateMemoryBlock(buffer.remaining(), false);
 		block.copyFromArray(buffer.array(), 0, 0, buffer.capacity());
 		blocks.add(block);
 		return blocks.size() - 1;
