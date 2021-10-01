@@ -23,7 +23,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	void init() {
 		try {
 			Common.runDir = System.getenv("runDir");
-			logger.info(Common.readEnvInfo());
+			// logger.info(Common.readEnvInfo());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -33,11 +33,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		Common.initDirectory(Common.runDir + "/pmem");
 		Common.initDirectory(Common.runDir + "/pmem/cache");
 
-		// String heapPath = Common.runDir + "/pmem/heap0";
-		// boolean initialized = Heap.exists(heapPath);
-		// logger.info("heap initialized: "+initialized);
-		// Common.heap = initialized ? Heap.openHeap(heapPath) :
-		// Heap.createHeap(heapPath, 0);
+		String heapPath = Common.runDir + "/pmem/heap0";
+		boolean initialized = Heap.exists(heapPath);
+		logger.info("heap initialized: " + initialized);
+		Common.heap = initialized ? Heap.openHeap(heapPath) : Heap.createHeap(heapPath, Common.heapSize);
 
 		Common.initDirectory(Common.runDir + "/essd");
 		Common.initDirectory(Common.runDir + "/essd/cache");

@@ -21,11 +21,14 @@ public class StorageEnginePmem extends StorageEngine {
 	@Override
 	public HashMap<Integer, ByteBuffer> getRange(long index, int fetchNum) {
 		HashMap<Integer, ByteBuffer> result = new HashMap<>();
-		for(long i=0;i<fetchNum;i++){
-			MemoryBlock block=blocks.get(index+i);
-			result.put(i, );
+		fetchNum = Math.min(fetchNum, (int) (blocks.size() - index));
+		for (int i = 0; i < fetchNum; i++) {
+			MemoryBlock block = blocks.get((int) (index + i));
+			ByteBuffer buffer = ByteBuffer.allocate((int) block.size());
+			block.copyToArray(0, buffer.array(), 0, (int) block.size());
+			result.put(i, buffer);
 		}
-		return null;
+		return result;
 	}
 
 	@Override
@@ -33,6 +36,6 @@ public class StorageEnginePmem extends StorageEngine {
 		MemoryBlock block = Common.heap.allocateMemoryBlock(buffer.capacity(), false);
 		block.copyFromArray(buffer.array(), 0, 0, buffer.capacity());
 		blocks.add(block);
-		return blocks.size()-1;
+		return blocks.size() - 1;
 	}
 }

@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class StorageEngineEssd {
+public class StorageEngineEssd extends StorageEngine {
 	private static final Logger logger = Logger.getLogger(StorageEngineEssd.class);
 
 	final String storagePath;
