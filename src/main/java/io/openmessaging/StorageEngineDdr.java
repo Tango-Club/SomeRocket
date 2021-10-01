@@ -5,7 +5,6 @@ import org.apache.log4j.Logger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import sun.nio.ch.DirectBuffer;
 
 public class StorageEngineDdr extends StorageEngine {
 

@@ -59,7 +59,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 				e.printStackTrace();
 			}
 		}
-		
+
 		String heapPath = Common.runDir + "/pmem/heap0";
 		boolean initialized = Heap.exists(heapPath);
 		logger.info("heap initialized: " + initialized);
@@ -141,10 +141,8 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			e.printStackTrace();
 		}
 		if (lastFlush < now && backup.dataNumber == now) {
-			if (lastFlush < now) {
-				lastFlush = backup.dataNumber;
-				backup.flush();
-			}
+			lastFlush = backup.dataNumber;
+			backup.flush();
 		}
 		return result;
 	}

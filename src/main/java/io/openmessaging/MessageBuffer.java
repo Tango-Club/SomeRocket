@@ -21,11 +21,11 @@ public class MessageBuffer {
 			String cachePath;
 			String offsetPath;
 			int rd = queueId;
-			if (rd >= 100 - 26) {
+			if (rd >= 100 - 25) {
 				cachePath = Common.runDir + "/essd/cache";
 				offsetPath = Common.runDir + "/pmem/cache";
 				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath, offsetPath));
-			} else if (rd >= 100 - 26 - 3) {
+			} else if (rd >= 100 - 25 - 1) {
 				cacheMap.put(queueId, new StorageEngineDdr());
 			} else {
 				cacheMap.put(queueId, new StorageEnginePmem());
