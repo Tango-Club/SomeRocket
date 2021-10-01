@@ -24,7 +24,9 @@ public class StorageEngineDdr extends StorageEngine {
 		for (int i = 0; i < fetchNum; i++) {
 			ByteBuffer block = blocks.get((int) (index + i));
 			ByteBuffer buffer = ByteBuffer.allocate(block.capacity());
-			buffer.put(block.array());
+			byte[] data = new byte[block.capacity()];
+			block.get(data);
+			buffer.put(data);
 			buffer.flip();
 			((DirectBuffer) block).cleaner().clean();
 			result.put(i, buffer);
