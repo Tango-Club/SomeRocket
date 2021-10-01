@@ -12,7 +12,7 @@ public class StorageEnginePmem extends StorageEngine {
 
 	final ArrayList<MemoryBlock> blocks;
 
-	private static final Logger logger = Logger.getLogger(StorageEngine.class);
+	private static final Logger logger = Logger.getLogger(StorageEnginePmem.class);
 
 	StorageEnginePmem() {
 		blocks = new ArrayList<>();
@@ -33,6 +33,7 @@ public class StorageEnginePmem extends StorageEngine {
 
 	@Override
 	public long write(ByteBuffer buffer) {
+		logger.info("write" + buffer);
 		MemoryBlock block = Common.heap.allocateMemoryBlock(buffer.capacity(), false);
 		Common.heap.setRoot(block.handle());
 		block.copyFromArray(buffer.array(), 0, 0, buffer.capacity());
