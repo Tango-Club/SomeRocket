@@ -13,6 +13,7 @@ public class WriteBenchmarkTest {
 
 	@Test
 	public void main0() {
+
 		Common.cleanPath(Common.runDir + "/essd/");
 		Common.cleanPath(Common.runDir + "/pmem/");
 

@@ -21,15 +21,15 @@ public class StorageEngineDdr extends StorageEngine {
 		HashMap<Integer, ByteBuffer> result = new HashMap<>();
 		fetchNum = Math.min(fetchNum, (int) (blocks.size() - index));
 		for (int i = 0; i < fetchNum; i++) {
-			ByteBuffer buffer = blocks.get((int) (index + i));
-			buffer.flip();
-			result.put(i, buffer);
+			result.put(i, blocks.get((int) (index + i)));
+			blocks.set((int) (index + i), null);
 		}
 		return result;
 	}
 
 	@Override
 	public long write(ByteBuffer buffer) {
+		buffer.flip();
 		blocks.add(buffer);
 		return blocks.size() - 1;
 	}

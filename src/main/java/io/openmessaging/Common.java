@@ -38,9 +38,7 @@ public abstract class Common {
 		}
 
 		for (File f : contents) {
-			if (!Files.isSymbolicLink(f.toPath())) {
-				deleteDir(f);
-			}
+			deleteDir(f);
 		}
 
 		file.delete();
