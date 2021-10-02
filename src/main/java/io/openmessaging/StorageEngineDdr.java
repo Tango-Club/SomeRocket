@@ -29,8 +29,7 @@ public class StorageEngineDdr extends StorageEngine {
 
 	@Override
 	public long write(ByteBuffer buffer) {
-		buffer.flip();
-		blocks.add(buffer);
+		blocks.add(Common.clone(buffer));
 		return blocks.size() - 1;
 	}
 }

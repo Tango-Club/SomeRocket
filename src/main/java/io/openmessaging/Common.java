@@ -30,6 +30,13 @@ public abstract class Common {
 
 	}
 
+	public static ByteBuffer clone(ByteBuffer original) {
+		ByteBuffer clone = ByteBuffer.allocate(original.remaining());
+		clone.put(original);
+		clone.flip();
+		return clone;
+ }
+
 	private static void deleteDir(File file) {
 		File[] contents = file.listFiles();
 		if (contents == null) {
