@@ -3,12 +3,11 @@ package io.openmessaging;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
 import com.intel.pmem.llpl.Heap;
 
 public abstract class Common {
-	final static int pageSize = 1024 * 1024;
+	final static int pageSize = 256 * 1024;
 	final static long heapSize = 59l * 1024 * 1024 * 1024;
 	public static Heap heap;
 	public static String runDir;
@@ -35,7 +34,7 @@ public abstract class Common {
 		clone.put(original);
 		clone.flip();
 		return clone;
- }
+	}
 
 	private static void deleteDir(File file) {
 		File[] contents = file.listFiles();

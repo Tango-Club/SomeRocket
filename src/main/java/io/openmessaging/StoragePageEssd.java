@@ -129,12 +129,12 @@ public class StoragePageEssd {
 	public HashMap<Integer, ByteBuffer> getRange(int index, int fetchNum, int preFix) {
 		HashMap<Integer, ByteBuffer> result = new HashMap<>();
 		try {
-			int preLength=getOffsetByIndex(index);
+			int preLength = getOffsetByIndex(index);
 			dataFileChannel.position(preLength);
 			for (int i = 0; i < fetchNum; i++) {
-				int length=offsetFile.readInt();
-				result.put(preFix + i, readNoSeek(length-preLength));
-				preLength=length;
+				int length = offsetFile.readInt();
+				result.put(preFix + i, readNoSeek(length - preLength));
+				preLength = length;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
