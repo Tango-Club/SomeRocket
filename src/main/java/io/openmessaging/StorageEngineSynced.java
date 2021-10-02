@@ -1,13 +1,20 @@
 package io.openmessaging;
 
+import org.apache.log4j.Logger;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 public class StorageEngineSynced {
+	private static final Logger logger = Logger.getLogger(StorageEngineSynced.class);
+
 	final String dataPath;
 	RandomAccessFile dataFile; // length(short,2)|qid(short,2)|topicCode(byte,1)|data(length)
+	FileChannel dataFileChannel;
+	ByteBuffer metaBuffer = ByteBuffer.allocate(5);
 	long dataNumber = 0;
 
 	StorageEngineSynced(String storagePath) throws IOException {
@@ -16,6 +23,7 @@ public class StorageEngineSynced {
 
 		try {
 			dataFile = new RandomAccessFile(dataPath, "rw");
+			dataFileChannel = dataFile.getChannel();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -23,20 +31,24 @@ public class StorageEngineSynced {
 
 	public void flush() {
 		try {
-			dataFile.getFD().sync();
+			dataFileChannel.force(true);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void write(Byte topicCode, short queueId, ByteBuffer buffer) throws IOException {
-		short length = (short) buffer.remaining();
-		dataFile.writeShort(length);
-		dataFile.writeShort(queueId);
-		dataFile.writeByte(topicCode);
-		byte[] data = new byte[length];
-		buffer.get(data);
-		dataFile.write(data);
-		dataNumber++;
+		synchronized (this) {
+			short length = (short) buffer.remaining();
+			metaBuffer.position(0);
+			metaBuffer.limit(5);
+			metaBuffer.putShort(length);
+			metaBuffer.putShort(queueId);
+			metaBuffer.put(topicCode);
+			metaBuffer.flip();
+			dataFileChannel.write(metaBuffer);
+			dataFileChannel.write(buffer);
+			dataNumber++;
+		}
 	}
 }
