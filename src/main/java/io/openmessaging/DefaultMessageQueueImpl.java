@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import com.intel.pmem.llpl.Heap;
 
@@ -141,8 +142,17 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			e.printStackTrace();
 		}
 		if (lastFlush < now && backup.dataNumber == now) {
-			lastFlush = backup.dataNumber;
-			backup.flush();
+			if (lastFlush + 40 >= backup.dataNumber) {
+				try {
+					TimeUnit.MILLISECONDS.sleep(1);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			if (lastFlush < now && backup.dataNumber == now) {
+				lastFlush = backup.dataNumber;
+				backup.flush();
+			}
 		}
 		return result;
 	}
