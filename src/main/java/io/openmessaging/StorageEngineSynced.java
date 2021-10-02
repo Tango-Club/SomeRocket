@@ -14,7 +14,6 @@ public class StorageEngineSynced {
 	final String dataPath;
 	RandomAccessFile dataFile; // length(short,2)|qid(short,2)|topicCode(byte,1)|data(length)
 	FileChannel dataFileChannel;
-	ByteBuffer metaBuffer = ByteBuffer.allocate(5);
 	long dataNumber = 0;
 
 	StorageEngineSynced(String storagePath) throws IOException {
@@ -31,24 +30,21 @@ public class StorageEngineSynced {
 
 	public void flush() {
 		try {
-			dataFileChannel.force(true);
+			dataFileChannel.force(false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	public void write(Byte topicCode, short queueId, ByteBuffer buffer) throws IOException {
-		synchronized (this) {
-			short length = (short) buffer.remaining();
-			metaBuffer.position(0);
-			metaBuffer.limit(5);
-			metaBuffer.putShort(length);
-			metaBuffer.putShort(queueId);
-			metaBuffer.put(topicCode);
-			metaBuffer.flip();
-			dataFileChannel.write(metaBuffer);
-			dataFileChannel.write(buffer);
-			dataNumber++;
-		}
+		ByteBuffer metaBuffer = ByteBuffer.allocate(5);
+		short length = (short) buffer.remaining();
+		metaBuffer.putShort(length);
+		metaBuffer.putShort(queueId);
+		metaBuffer.put(topicCode);
+		metaBuffer.flip();
+		dataFileChannel.write(metaBuffer);
+		dataFileChannel.write(buffer);
+		dataNumber++;
 	}
 }
