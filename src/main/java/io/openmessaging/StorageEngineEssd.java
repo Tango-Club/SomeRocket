@@ -41,9 +41,6 @@ public class StorageEngineEssd extends StorageEngine {
 
 	public long write(ByteBuffer buffer) {
 		if (pages.size() == 0 || getLastPage().lastOffset + buffer.remaining() > Common.pageSize) {
-			if (pages.size() != 0) {
-				getLastPage().close();
-			}
 			String pageStoragePath = storagePath + "/" + pages.size();
 			String pageOffsetPath = offsetPath + "/" + pages.size();
 			try {
@@ -86,13 +83,8 @@ public class StorageEngineEssd extends StorageEngine {
 			if (pageFetchNum == 0)
 				break;
 
-			if (pageId != pages.size() - 1)
-				pages.get(pageId).open();
 			result.putAll(pages.get(pageId).getRange(pageIndex, pageFetchNum, readed));
 			pageIndex += pageFetchNum;
-			if (pageId != pages.size() - 1)
-				pages.get(pageId).close();
-
 			if (pageIndex == pages.get(pageId).dataNumber && pageId + 1 < pages.size()) {
 				pages.get(pageId).delete();
 			}

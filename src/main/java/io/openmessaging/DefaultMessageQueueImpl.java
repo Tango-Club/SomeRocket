@@ -129,14 +129,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		ready(topic);
 		Byte topicCode = encodeTopic(topic);
 		long now = backup.dataNumber + 1;
-		try {
-			backup.write(topicCode, (short) queueId, data);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		data.flip();
 		long result = -1;
 		try {
+			backup.write(topicCode, (short) queueId, data);
+			data.flip();
 			result = topicQueueMap.get(topic).appendData(queueId, data);
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -144,7 +140,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		if (lastFlush < now && backup.dataNumber == now) {
 			if (lastFlush + 50 > backup.dataNumber) {
 				try {
-					TimeUnit.MICROSECONDS.sleep(500);
+					TimeUnit.MILLISECONDS.sleep(5);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

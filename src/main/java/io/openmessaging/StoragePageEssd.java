@@ -45,16 +45,6 @@ public class StoragePageEssd {
 		}
 	}
 
-	public void close() {
-		try {
-			dataFileChannel.close();
-			dataFile.close();
-			offsetFile.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 	private int getOffsetByIndex(int x) throws IOException {
 		offsetFile.seek((long) x << 2);
 		return offsetFile.readInt();
@@ -111,12 +101,6 @@ public class StoragePageEssd {
 		dataFileChannel.read(buffer);
 		buffer.flip();
 		return buffer;
-	}
-
-	private ByteBuffer getDataByIndexNoSeek(int index) throws IOException {
-		int offset = getOffsetByIndex(index);
-		int length = getOffsetByIndex(index + 1) - offset;
-		return readNoSeek(length);
 	}
 
 	public ByteBuffer getDataByIndex(int index) throws IOException {
