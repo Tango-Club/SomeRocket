@@ -138,7 +138,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			e.printStackTrace();
 		}
 		if (lastFlush < now && backup.dataNumber == now) {
-			if (lastFlush + 50 > backup.dataNumber) {
+			if (lastFlush + 20 > backup.dataNumber) {
 				try {
 					TimeUnit.MILLISECONDS.sleep(1);
 				} catch (InterruptedException e) {
