@@ -9,11 +9,13 @@ import java.util.HashMap;
 public class StorageEngineDdr extends StorageEngine {
 
 	final ArrayList<ByteBuffer> blocks;
+	boolean isDirect;
 
 	private static final Logger logger = Logger.getLogger(StorageEngineDdr.class);
 
-	StorageEngineDdr() {
+	StorageEngineDdr(boolean isOutHeapMemory) {
 		blocks = new ArrayList<>();
+		isDirect = isOutHeapMemory;
 	}
 
 	@Override
@@ -29,7 +31,7 @@ public class StorageEngineDdr extends StorageEngine {
 
 	@Override
 	public long write(ByteBuffer buffer) {
-		blocks.add(Common.clone(buffer));
+		blocks.add(Common.clone(buffer, isDirect));
 		return blocks.size() - 1;
 	}
 }

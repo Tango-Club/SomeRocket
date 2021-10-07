@@ -26,7 +26,9 @@ public class MessageBuffer {
 				offsetPath = Common.runDir + "/pmem/cache";
 				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath, offsetPath));
 			} else if (rd <= 24) {
-				cacheMap.put(queueId, new StorageEngineDdr());
+				cacheMap.put(queueId, new StorageEngineDdr(false));
+			} else if (rd <= 25) {
+				cacheMap.put(queueId, new StorageEngineDdr(true));
 			} else {
 				cacheMap.put(queueId, new StorageEnginePmem());
 			}

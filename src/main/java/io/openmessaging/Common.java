@@ -29,8 +29,12 @@ public abstract class Common {
 
 	}
 
-	public static ByteBuffer clone(ByteBuffer original) {
-		ByteBuffer clone = ByteBuffer.allocate(original.remaining());
+	public static ByteBuffer clone(ByteBuffer original, Boolean isDirect) {
+		ByteBuffer clone;
+		if (!isDirect)
+			clone = ByteBuffer.allocate(original.remaining());
+		else
+			clone = ByteBuffer.allocateDirect(original.remaining());
 		clone.put(original);
 		clone.flip();
 		return clone;
