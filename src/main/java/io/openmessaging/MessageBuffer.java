@@ -23,7 +23,7 @@ public class MessageBuffer {
 			int rd = queueId % 100;
 			if (rd <= 19) {
 				cachePath = Common.runDir + "/essd/cache";
-				offsetPath = Common.runDir + "/pmem/cache";
+				offsetPath = Common.runDir + "/essd/cache";
 				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath, offsetPath));
 			} else if (rd <= 23) {
 				cacheMap.put(queueId, new StorageEngineDdr());
