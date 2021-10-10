@@ -138,8 +138,14 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			e.printStackTrace();
 		}
 		if (lastFlush < now && backup.dataNumber == now) {
-			lastFlush = backup.dataNumber;
-			backup.flush();
+			int times = 100000;
+			while (times > 0 && lastFlush + 50 > backup.dataNumber && backup.dataNumber == now) {
+				times--;
+			}
+			if (lastFlush < now && backup.dataNumber == now) {
+				lastFlush = backup.dataNumber;
+				backup.flush();
+			}
 		}
 		return result;
 	}
