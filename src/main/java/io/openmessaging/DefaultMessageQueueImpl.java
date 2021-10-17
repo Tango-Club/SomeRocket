@@ -141,7 +141,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			int times = 5;
 			while (times > 0 && lastFlush + 30 > backup.dataNumber && backup.dataNumber == now) {
 				try {
-					TimeUnit.MICROSECONDS.sleep(200);
+					TimeUnit.MICROSECONDS.sleep(50);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
