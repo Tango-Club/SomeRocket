@@ -37,7 +37,7 @@ public class StorageEngineSynced {
 	}
 
 	public void write(Byte topicCode, short queueId, ByteBuffer buffer) throws IOException {
-		ByteBuffer metaBuffer = ByteBuffer.allocate(5);
+		ByteBuffer metaBuffer = ByteBuffer.allocateDirect(5);
 		short length = (short) buffer.remaining();
 		metaBuffer.putShort(length);
 		metaBuffer.putShort(queueId);
