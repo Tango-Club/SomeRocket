@@ -8,18 +8,17 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import java.util.HashMap;
 
-public class StoragePageEssd {
+public class StoragePageDict {
 	public int dataNumber;
 	public int lastOffset;
 
-	final ArrayList<Integer> offsets = new ArrayList<>();
-
 	final String dataPath;
+	final String offsetPath;
 
 	RandomAccessFile dataFile;
+	RandomAccessFile offsetFile;
 
 	FileChannel dataFileChannel;
 
@@ -27,9 +26,19 @@ public class StoragePageEssd {
 
 	private static final Logger logger = Logger.getLogger(StorageEngineEssd.class);
 
+	public void flush() {
+		try {
+			dataFileChannel.force(false);
+			offsetFile.getFD().sync();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public void open() {
 		try {
 			dataFile = new RandomAccessFile(dataPath, "rw");
+			offsetFile = new RandomAccessFile(offsetPath, "rw");
 			dataFileChannel = dataFile.getChannel();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -37,33 +46,44 @@ public class StoragePageEssd {
 	}
 
 	private int getOffsetByIndex(int x) throws IOException {
-		return offsets.get(x);
+		offsetFile.seek((long) x << 2);
+		return offsetFile.readInt();
 	}
 
 	private void appendOffset(int offset) throws IOException {
-		offsets.add(offset);
+		offsetFile.seek((long) dataNumber << 2);
+		offsetFile.writeInt(offset);
 	}
 
 	public boolean isReload() {
 		return isReload;
 	}
 
-	StoragePageEssd(String baseStoragePath, String baseOffsetPath, boolean exist) throws IOException {
+	StoragePageDict(String baseStoragePath, String baseOffsetPath, boolean exist) throws IOException {
 		dataPath = baseStoragePath + ".data";
+		offsetPath = baseOffsetPath + ".offset";
 		Common.initPath(dataPath);
+		Common.initPath(offsetPath);
 
 		this.isReload = exist;
 
 		open();
 
-		this.dataNumber = 0;
-		appendOffset(0);
+		if (exist) {
+			this.dataNumber = ((int) offsetFile.length() >> 2) - 1;
+			this.lastOffset = getOffsetByIndex(dataNumber - 1);
+		} else {
+			this.dataNumber = 0;
+			this.lastOffset = 0;
+			appendOffset(0);
+		}
 	}
 
 	public void delete() {
 		File data = new File(dataPath);
 		data.delete();
-		offsets.clear();
+		File offset = new File(offsetPath);
+		offset.delete();
 	}
 
 	public void write(ByteBuffer buffer) throws IOException {
@@ -96,7 +116,7 @@ public class StoragePageEssd {
 			int preLength = getOffsetByIndex(index);
 			dataFileChannel.position(preLength);
 			for (int i = 0; i < fetchNum; i++) {
-				int length = getOffsetByIndex(index+i+1);
+				int length = offsetFile.readInt();
 				result.put(preFix + i, readNoSeek(length - preLength));
 				preLength = length;
 			}

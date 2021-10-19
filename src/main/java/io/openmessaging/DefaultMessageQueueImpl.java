@@ -16,7 +16,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	final ConcurrentHashMap<String, MessageBuffer> topicQueueMap = new ConcurrentHashMap<>();
 	final ConcurrentHashMap<String, Byte> topicCodeMap = new ConcurrentHashMap<>();
 	StorageEngineSynced backup;
-	StoragePageEssd topicCodeDictPage;
+	StoragePageDict topicCodeDictPage;
 
 	boolean isInited = false;
 	long lastFlush = -1;
@@ -48,7 +48,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 
 		String dictPath = storagePath + "/dict";
 		try {
-			topicCodeDictPage = new StoragePageEssd(dictPath, dictPath, isReload);
+			topicCodeDictPage = new StoragePageDict(dictPath, dictPath, isReload);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
