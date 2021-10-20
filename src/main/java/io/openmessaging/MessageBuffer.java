@@ -18,11 +18,9 @@ public class MessageBuffer {
 
 	private void createStorage(int queueId) {
 		if (!cacheMap.containsKey(queueId)) {
-			String cachePath;
-			String offsetPath;
 			int rd = queueId % 100;
 			if (rd <= 20) {
-				cachePath = Common.runDir + "/essd/cache";
+				String cachePath = Common.runDir + "/essd/cache";
 				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath));
 			} else if (rd <= 24) {
 				cacheMap.put(queueId, new StorageEngineDdr(false));
