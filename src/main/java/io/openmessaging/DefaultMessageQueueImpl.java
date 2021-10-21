@@ -138,10 +138,10 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			e.printStackTrace();
 		}
 		if (lastFlush < now && backup.dataNumber == now) {
-			int times = 20;
+			int times = 2;
 			while (times > 0 && lastFlush + 30 > backup.dataNumber && backup.dataNumber == now) {
 				try {
-					TimeUnit.MILLISECONDS.sleep(1);
+					TimeUnit.MILLISECONDS.sleep(5);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
