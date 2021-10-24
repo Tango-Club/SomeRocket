@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -14,7 +13,7 @@ import com.intel.pmem.llpl.Heap;
 public class DefaultMessageQueueImpl extends MessageQueue {
 	private static final Logger logger = Logger.getLogger(DefaultMessageQueueImpl.class);
 
-	final ArrayList<MessageBuffer> topicQueueMap = new ArrayList<>();
+	final ConcurrentHashMap<String, MessageBuffer> topicQueueMap = new ConcurrentHashMap<>();
 	final ConcurrentHashMap<String, Byte> topicCodeMap = new ConcurrentHashMap<>();
 	StorageEngineSynced backup;
 	StoragePageDict topicCodeDictPage;
@@ -76,7 +75,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		for (byte i = 0; i < topicCodeDictPage.dataNumber; i++) {
 			String topic;
 			topic = Common.getString(topicCodeDictPage.getDataByIndex(i));
-			topicQueueMap.add(new MessageBuffer(topic));
+			tryCreateStorage(topic);
 			reverseMap.put(i, topic);
 			topicCodeMap.put(topic, i);
 		}
@@ -94,21 +93,33 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 			i += 5 + length;
 			backup.dataNumber++;
 
-			topicQueueMap.get(topicCode).appendData(queueId, buffer);
+			String topic = reverseMap.get(topicCode);
+			topicQueueMap.get(topic).appendData(queueId, buffer);
 		}
 	}
 
 	private void ready(String topic) {
 		tryInit();
+		tryCreateStorage(topic);
 	}
 
 	private void tryInit() {
-		if (isInited)
+		if (!isInited) {
+			synchronized (this) {
+				if (!isInited) {
+					init();
+					isInited = true;
+				}
+			}
+		}
+	}
+
+	private void tryCreateStorage(String topic) {
+		if (topicQueueMap.containsKey(topic))
 			return;
 		synchronized (this) {
-			if (!isInited) {
-				init();
-				isInited = true;
+			if (!topicQueueMap.containsKey(topic)) {
+				topicQueueMap.put(topic, new MessageBuffer(topic));
 			}
 		}
 	}
@@ -122,7 +133,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		try {
 			backup.write(topicCode, (short) queueId, data);
 			data.flip();
-			result = topicQueueMap.get(topicCode).appendData(queueId, data);
+			result = topicQueueMap.get(topic).appendData(queueId, data);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -153,7 +164,6 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 				return topicCodeMap.get(topic);
 			}
 			int mapSize = topicCodeMap.size();
-			topicQueueMap.add(new MessageBuffer(topic));
 			topicCodeMap.put(topic, (byte) mapSize);
 			try {
 				topicCodeDictPage.write(Common.getByteBuffer(topic));
@@ -168,7 +178,6 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	@Override
 	public Map<Integer, ByteBuffer> getRange(String topic, int queueId, long offset, int fetchNum) {
 		ready(topic);
-		Byte topicCode = encodeTopic(topic);
-		return topicQueueMap.get(topicCode).getRange(queueId, offset, fetchNum);
+		return topicQueueMap.get(topic).getRange(queueId, offset, fetchNum);
 	}
 }
