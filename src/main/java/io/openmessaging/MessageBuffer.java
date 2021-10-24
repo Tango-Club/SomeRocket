@@ -4,41 +4,34 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class MessageBuffer {
 	private static final Logger logger = Logger.getLogger(MessageBuffer.class);
-	final ConcurrentHashMap<Integer, StorageEngine> cacheMap = new ConcurrentHashMap<>();
+	final ArrayList<StorageEngine> cacheMap = new ArrayList<>();
 	final String topic;
 
 	MessageBuffer(String topic) {
 		this.topic = topic;
-	}
-
-	private void createStorage(int queueId) {
-		if (!cacheMap.containsKey(queueId)) {
-			int rd = queueId % 100;
+		for (int i = 0; i <= 5000; i++) {
+			int rd = i % 100;
 			if (rd <= 19) {
 				String cachePath = Common.runDir + "/essd/cache";
-				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath));
+				cacheMap.add(new StorageEngineEssd(topic, i, cachePath));
 			} else if (rd <= 23) {
-				cacheMap.put(queueId, new StorageEngineDdr(false));
-			} else if (rd <= 23) {
-				cacheMap.put(queueId, new StorageEngineDdr(true));
+				cacheMap.add(new StorageEngineDdr(false));
 			} else {
-				cacheMap.put(queueId, new StorageEnginePmem());
+				cacheMap.add(new StorageEnginePmem());
 			}
 		}
 	}
 
 	public long appendData(int queueId, ByteBuffer data) throws IOException {
-		createStorage(queueId);
 		return cacheMap.get(queueId).write(data);
 	}
 
 	public HashMap<Integer, ByteBuffer> getRange(int queueId, long offset, int fetchNum) {
-		createStorage(queueId);
 		return cacheMap.get(queueId).getRange(offset, fetchNum);
 	}
 }

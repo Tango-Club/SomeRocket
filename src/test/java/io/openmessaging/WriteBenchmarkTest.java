@@ -21,10 +21,10 @@ public class WriteBenchmarkTest {
 
 		String text = "Hello Message Queue!";
 		String topic = "TestTopic";
-		int queueId = 123;
+		int queueId = 100;
 
 		try {
-			int x = 100;
+			int x = 1000;
 			int y = 50;
 			for (int i = 0; i < x; i++) {
 				ArrayList<CompletableFuture<Void>> futures = new ArrayList<>();

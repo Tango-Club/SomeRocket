@@ -104,12 +104,12 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 	}
 
 	private void tryInit() {
-		if (!isInited) {
-			synchronized (this) {
-				if (!isInited) {
-					init();
-					isInited = true;
-				}
+		if (isInited)
+			return;
+		synchronized (this) {
+			if (!isInited) {
+				init();
+				isInited = true;
 			}
 		}
 	}
