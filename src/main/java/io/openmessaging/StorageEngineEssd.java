@@ -11,7 +11,7 @@ public class StorageEngineEssd extends StorageEngine {
 	private static final Logger logger = Logger.getLogger(StorageEngineEssd.class);
 
 	final String storagePath;
-	final ArrayList<Long> dataNumPre = new ArrayList<>();
+	final ArrayList<Integer> dataNumPre = new ArrayList<>();
 	final ArrayList<StoragePageEssd> pages = new ArrayList<>();
 
 	public StorageEngineEssd(String topic, int queueId, String storageBase) {
@@ -19,14 +19,14 @@ public class StorageEngineEssd extends StorageEngine {
 		storagePath = storageBase + "/ds_" + topic + "_" + queueId;
 		Common.initDirectory(storagePath);
 
-		dataNumPre.add(0L);
+		dataNumPre.add(0);
 	}
 
 	private void updateDataNum() {
-		dataNumPre.set(dataNumPre.size() - 1, getDataNum() + 1);
+		dataNumPre.set(dataNumPre.size() - 1, (int) (getDataNum() + 1));
 	}
 
-	private Long getDataNum() {
+	private Integer getDataNum() {
 		return dataNumPre.get(dataNumPre.size() - 1);
 	}
 
