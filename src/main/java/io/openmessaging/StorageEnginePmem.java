@@ -6,11 +6,11 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.intel.pmem.llpl.CompactMemoryBlock;
+import com.intel.pmem.llpl.NoCheckMemoryBlock;
 
 public class StorageEnginePmem extends StorageEngine {
 
-	final ArrayList<CompactMemoryBlock> blocks;
+	final ArrayList<NoCheckMemoryBlock> blocks;
 	final ArrayList<Integer> sizes;
 
 	private static final Logger logger = Logger.getLogger(StorageEnginePmem.class);
@@ -25,7 +25,7 @@ public class StorageEnginePmem extends StorageEngine {
 		HashMap<Integer, ByteBuffer> result = new HashMap<>();
 		fetchNum = Math.min(fetchNum, (int) (blocks.size() - index));
 		for (int i = 0; i < fetchNum; i++) {
-			CompactMemoryBlock block = blocks.get((int) (index + i));
+			NoCheckMemoryBlock block = blocks.get((int) (index + i));
 			Integer size = sizes.get((int) (index + i));
 			ByteBuffer buffer = ByteBuffer.allocate(size);
 			block.copyToArray(0, buffer.array(), 0, size);
@@ -37,7 +37,7 @@ public class StorageEnginePmem extends StorageEngine {
 
 	@Override
 	public long write(ByteBuffer buffer) {
-		CompactMemoryBlock block = Common.heap.allocateCompactMemoryBlock(buffer.remaining(), false);
+		NoCheckMemoryBlock block = new NoCheckMemoryBlock(Common.heap, buffer.remaining(), false);
 		sizes.add(buffer.remaining());
 		block.copyFromArray(buffer.array(), 0, 0, buffer.remaining());
 		blocks.add(block);
