@@ -19,10 +19,10 @@ public class MessageBuffer {
 	private void createStorage(int queueId) {
 		if (!cacheMap.containsKey(queueId)) {
 			int rd = queueId % 100;
-			if (rd <= 19) {
+			if (rd <= 17) {
 				String cachePath = Common.runDir + "/essd/cache";
 				cacheMap.put(queueId, new StorageEngineEssd(topic, queueId, cachePath));
-			} else if (rd <= 23) {
+			} else if (rd <= 21) {
 				cacheMap.put(queueId, new StorageEngineDdr(false));
 			} else if (rd <= 23) {
 				cacheMap.put(queueId, new StorageEngineDdr(true));
