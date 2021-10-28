@@ -18,4 +18,12 @@ public final class NoCheckMemoryBlock extends AbstractMemoryBlock {
 	void checkBoundsAndLength(long offset, long length) {
 	}
 
+	public void copyFromArray(byte[] srcArray, int srcOffset, long dstOffset, int length) {
+		MemoryAccessor.uncheckedCopyFromArray(srcArray, srcOffset, directAddress() + metadataSize() + dstOffset, length);
+    }
+
+	public void copyToArray(long srcAddress, byte[] dstArray, int dstOffset, int length) {
+        long dstAddress = AnyHeap.UNSAFE.ARRAY_BYTE_BASE_OFFSET + AnyHeap.UNSAFE.ARRAY_BYTE_INDEX_SCALE * dstOffset;
+        AnyHeap.UNSAFE.copyMemory(null, srcAddress, dstArray, dstAddress, length);
+    }
 }
