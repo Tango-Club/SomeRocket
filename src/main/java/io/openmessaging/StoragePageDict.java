@@ -46,12 +46,12 @@ public class StoragePageDict {
 	}
 
 	private int getOffsetByIndex(int x) throws IOException {
-		offsetFile.seek(x << 2);
+		offsetFile.seek((long) x << 2);
 		return offsetFile.readInt();
 	}
 
 	private void appendOffset(int offset) throws IOException {
-		offsetFile.seek(dataNumber << 2);
+		offsetFile.seek((long) dataNumber << 2);
 		offsetFile.writeInt(offset);
 	}
 
