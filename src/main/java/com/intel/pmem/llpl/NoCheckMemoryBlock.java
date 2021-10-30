@@ -19,11 +19,10 @@ public final class NoCheckMemoryBlock extends AbstractMemoryBlock {
 	}
 
 	public void copyFromArray(byte[] srcArray, int srcOffset, long dstOffset, int length) {
-		MemoryAccessor.uncheckedCopyFromArray(srcArray, srcOffset, directAddress() + metadataSize() + dstOffset,
-				length);
+		MemoryAccessor.uncheckedCopyFromArray(srcArray, srcOffset, directAddress() + dstOffset, length);
 	}
 
 	public void copyToArray(long srcOffset, byte[] dstArray, int dstOffset, int length) {
-		uncheckedCopyToArray(directAddress() + metadataSize() + srcOffset, dstArray, dstOffset, length);
+		uncheckedCopyToArray(directAddress() + srcOffset, dstArray, dstOffset, length);
 	}
 }
