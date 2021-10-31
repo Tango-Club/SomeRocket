@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 import com.intel.pmem.llpl.Heap;
 
 public abstract class Common {
-	final static int pageSize = 1024 * 1024 * 1024;
+	final static int pageSize = 64 * 1024;
 	final static long heapSize = 60l * 1024 * 1024 * 1024;
 	public static Heap heap;
 	public static String runDir;
