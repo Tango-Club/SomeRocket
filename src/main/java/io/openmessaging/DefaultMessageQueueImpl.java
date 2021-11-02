@@ -139,7 +139,7 @@ public class DefaultMessageQueueImpl extends MessageQueue {
 		}
 		if (lastFlush < now && backup.dataNumber == now) {
 			int times = 10;
-			while (times > 0 && lastFlush + 30 > backup.dataNumber && backup.dataNumber == now) {
+			while (times > 0 && lastFlush + 40 > backup.dataNumber && backup.dataNumber == now) {
 				try {
 					TimeUnit.MILLISECONDS.sleep(1);
 				} catch (InterruptedException e) {
